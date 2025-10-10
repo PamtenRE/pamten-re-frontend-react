@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import Hero from '@/components/Hero';
-import Footer from '@/components/Footer';
-import FeaturesGrid from '@/components/FeaturesGrid';
-import AnimatedBackground from '@/components/AnimatedBackground';
-import AnimatedLottie from '@/components/AnimatedLottie';
-import FloatingBlobs from '@/components/FloatingBlobs';
-import BuiltForEveryone from '@/components/BuiltForEveryone';
+import Hero from "@/components/Hero";
+import Footer from "@/components/Footer";
+import FeaturesGrid from "@/components/FeaturesGrid";
+import AnimatedBackground from "@/components/AnimatedBackground";
+import AnimatedLottie from "@/components/AnimatedLottie";
+import FloatingBlobs from "@/components/FloatingBlobs";
+import BuiltForEveryone from "@/components/BuiltForEveryone";
 
 export default function Home() {
   return (

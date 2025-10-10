@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "../utils/api";
@@ -15,10 +15,12 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean; // ✅ new
+  profileProgress: number; // ✅ new
   login: (userId: string, password: string) => Promise<void>;
   register: (formData: any) => Promise<void>;
   logout: () => void;
   setUser: (user: User | null) => void;
+  updateProfileProgress: (progress: number) => void; // ✅ new
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,6 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false); // ✅ track auth
+  const [profileProgress, setProfileProgress] = useState(0); // ✅ track profile progress
   const router = useRouter();
 
   // ✅ Load saved user/token on mount
@@ -38,6 +41,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const parsedUser = JSON.parse(storedUser);
       setUser(parsedUser);
       setIsAuthenticated(true);
+    }
+
+    // ✅ NEW: Load profile progress from localStorage
+    const savedProgress = localStorage.getItem("profileProgress");
+    if (savedProgress) {
+      setProfileProgress(parseInt(savedProgress));
     }
   }, []);
 
@@ -51,7 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         ? "/recruiter/profile"
         : role === "recruiter"
         ? "/recruiter/dashboard"
-        : "/candidate/dashboard";
+        : "/candidate/home";
 
     router.push(target);
   }, [user, router]);
@@ -93,11 +102,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsAuthenticated(false);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("profileProgress"); // ✅ NEW
+    localStorage.removeItem("profileFormData"); // ✅ NEW
     router.push("/login");
+  };
+  // ✅ NEW: Function to update profile progress
+  const updateProfileProgress = (progress: number) => {
+    setProfileProgress(progress);
+    localStorage.setItem("profileProgress", progress.toString());
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated, login, register, logout, setUser }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        isAuthenticated,
+        profileProgress, // ✅ NEW
+        login,
+        register,
+        logout,
+        setUser,
+        updateProfileProgress, // ✅ NEW
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
