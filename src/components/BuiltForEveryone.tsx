@@ -1,10 +1,22 @@
-'use client';
-import { useState, useEffect, useRef, useContext } from 'react';
+"use client";
+import { useState, useRef, useContext, useEffect } from "react";
 import {
-  CheckCircle, Sparkles, Clock, BarChart, Globe,
-  Users, Settings, ActivitySquare, Shield, Briefcase, ArrowRight
-} from 'lucide-react';
-import { ModalContext } from '@/contexts/LoginModalContext';
+  CheckCircle,
+  Sparkles,
+  Clock,
+  BarChart,
+  Globe,
+  Users,
+  Settings,
+  ActivitySquare,
+  Shield,
+  Briefcase,
+  ArrowRight,
+} from "lucide-react";
+import { ModalContext } from "@/contexts/LoginModalContext";
+import { useFeatures } from "@/hooks/queries";
+import { LoadingSection, ErrorMessage } from "@/components/LoadingStates";
+import type { Feature } from "@/types";
 
 const iconMap: Record<string, React.ElementType> = {
   Sparkles,
@@ -20,12 +32,20 @@ const iconMap: Record<string, React.ElementType> = {
   ArrowRight,
 };
 
-interface Feature {
-  icon: keyof typeof iconMap;
-  text: string;
+interface FeaturesResponse {
+  candidate: Feature[];
+  recruiter: Feature[];
 }
 
-function AnimatedStat({ value, suffix, duration = 1200 }: { value: number, suffix?: string, duration?: number }) {
+function AnimatedStat({
+  value,
+  suffix,
+  duration = 1200,
+}: {
+  value: number;
+  suffix?: string;
+  duration?: number;
+}) {
   const [display, setDisplay] = useState(0);
   const start = useRef<number>(0);
 
@@ -42,41 +62,35 @@ function AnimatedStat({ value, suffix, duration = 1200 }: { value: number, suffi
     return () => cancelAnimationFrame(raf);
   }, [value, duration]);
 
-  return <span className="text-3xl font-bold mb-2">{display}{suffix}</span>;
+  return (
+    <span className="text-3xl font-bold mb-2">
+      {display}
+      {suffix}
+    </span>
+  );
 }
 
 export default function BuiltForEveryone() {
-  const [tab, setTab] = useState<'candidate' | 'recruiter'>('candidate');
+  const [tab, setTab] = useState<"candidate" | "recruiter">("candidate");
   const { openModal } = useContext(ModalContext);
-  const [candidateFeatures, setCandidateFeatures] = useState<Feature[]>([]);
-  const [recruiterFeatures, setRecruiterFeatures] = useState<Feature[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, isLoading: loading, error } = useFeatures();
 
-  useEffect(() => {
-    Promise.all([
-      fetch('/api/features?type=candidate').then(res => res.ok ? res.json() : Promise.reject('Failed to fetch candidate features')),
-      fetch('/api/features?type=recruiter').then(res => res.ok ? res.json() : Promise.reject('Failed to fetch recruiter features')),
-    ])
-      .then(([candidateData, recruiterData]) => {
-        setCandidateFeatures(candidateData.features || []);
-        setRecruiterFeatures(recruiterData.features || []);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(typeof err === 'string' ? err : err.message);
-        setLoading(false);
-      });
-  }, []);
+  const candidateFeatures = data?.candidate || [];
+  const recruiterFeatures = data?.recruiter || [];
+  const errorMessage =
+    error instanceof Error ? error.message : "Failed to load features";
 
   // Accessibility: keyboard navigation for tabs
-  const tabRefs = [useRef<HTMLButtonElement>(null), useRef<HTMLButtonElement>(null)];
+  const tabRefs = [
+    useRef<HTMLButtonElement>(null),
+    useRef<HTMLButtonElement>(null),
+  ];
   const handleKeyDown = (e: React.KeyboardEvent, idx: number) => {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+    if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
       e.preventDefault();
-      const nextIdx = e.key === 'ArrowRight' ? (idx + 1) % 2 : (idx + 1) % 2;
+      const nextIdx = e.key === "ArrowRight" ? (idx + 1) % 2 : (idx + 1) % 2;
       tabRefs[nextIdx].current?.focus();
-      setTab(nextIdx === 0 ? 'candidate' : 'recruiter');
+      setTab(nextIdx === 0 ? "candidate" : "recruiter");
     }
   };
 
@@ -91,67 +105,82 @@ export default function BuiltForEveryone() {
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-8 text-gray-900 dark:text-white">
             Built for Everyone
           </h2>
-          <div className="flex justify-center mb-8 relative" role="tablist" aria-label="User type tabs">
+          <div
+            className="flex justify-center mb-8 relative"
+            role="tablist"
+            aria-label="User type tabs"
+          >
             <button
               ref={tabRefs[0]}
               className={`px-6 py-2 font-medium transition focus:outline-none ${
-                tab === 'candidate'
-                  ? 'text-blue-600'
-                  : 'text-gray-700 dark:text-gray-300'
+                tab === "candidate"
+                  ? "text-blue-600"
+                  : "text-gray-700 dark:text-gray-300"
               }`}
-              aria-selected={tab === 'candidate'}
+              aria-selected={tab === "candidate"}
               aria-controls="candidate-panel"
-              tabIndex={tab === 'candidate' ? 0 : -1}
-              onClick={() => setTab('candidate')}
-              onKeyDown={e => handleKeyDown(e, 0)}
+              tabIndex={tab === "candidate" ? 0 : -1}
+              onClick={() => setTab("candidate")}
+              onKeyDown={(e) => handleKeyDown(e, 0)}
               id="candidate-tab"
               type="button"
             >
               For Candidates
-              {tab === 'candidate' && (
+              {tab === "candidate" && (
                 <span className="block h-1 bg-blue-600 rounded-full mt-1 transition-all duration-300"></span>
               )}
             </button>
             <button
               ref={tabRefs[1]}
               className={`px-6 py-2 font-medium transition focus:outline-none ${
-                tab === 'recruiter'
-                  ? 'text-blue-600'
-                  : 'text-gray-700 dark:text-gray-300'
+                tab === "recruiter"
+                  ? "text-blue-600"
+                  : "text-gray-700 dark:text-gray-300"
               }`}
-              aria-selected={tab === 'recruiter'}
+              aria-selected={tab === "recruiter"}
               aria-controls="recruiter-panel"
-              tabIndex={tab === 'recruiter' ? 0 : -1}
-              onClick={() => setTab('recruiter')}
-              onKeyDown={e => handleKeyDown(e, 1)}
+              tabIndex={tab === "recruiter" ? 0 : -1}
+              onClick={() => setTab("recruiter")}
+              onKeyDown={(e) => handleKeyDown(e, 1)}
               id="recruiter-tab"
               type="button"
             >
               For Recruiters
-              {tab === 'recruiter' && (
+              {tab === "recruiter" && (
                 <span className="block h-1 bg-blue-600 rounded-full mt-1 transition-all duration-300"></span>
               )}
             </button>
           </div>
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div
-              id={tab === 'candidate' ? 'candidate-panel' : 'recruiter-panel'}
+              id={tab === "candidate" ? "candidate-panel" : "recruiter-panel"}
               role="tabpanel"
-              aria-labelledby={tab === 'candidate' ? 'candidate-tab' : 'recruiter-tab'}
+              aria-labelledby={
+                tab === "candidate" ? "candidate-tab" : "recruiter-tab"
+              }
             >
               <h3 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
-                {tab === 'candidate' ? 'Your Career, Supercharged' : 'Recruitment, Reimagined'}
+                {tab === "candidate"
+                  ? "Your Career, Supercharged"
+                  : "Recruitment, Reimagined"}
               </h3>
               {loading ? (
-                <div className="text-center text-white py-10">Loading features...</div>
+                <LoadingSection />
               ) : error ? (
-                <div className="text-center text-red-400 py-10">{error}</div>
+                <ErrorMessage message={errorMessage} />
               ) : (
                 <ul className="space-y-3 mb-6">
-                  {(tab === 'candidate' ? candidateFeatures : recruiterFeatures).map((feature, idx) => {
-                    const Icon = iconMap[feature.icon] || Sparkles;
+                  {(tab === "candidate"
+                    ? candidateFeatures
+                    : recruiterFeatures
+                  ).map((feature: Feature, idx: number) => {
+                    const Icon =
+                      iconMap[feature.icon as keyof typeof iconMap] || Sparkles;
                     return (
-                      <li key={idx} className="flex items-start gap-2 text-gray-800 dark:text-gray-200">
+                      <li
+                        key={`${tab}-feature-${idx}`}
+                        className="flex items-start gap-2 text-gray-800 dark:text-gray-200"
+                      >
                         <Icon className="mt-1 text-blue-500 w-5 h-5 flex-shrink-0" />
                         <span>{feature.text}</span>
                       </li>
@@ -161,9 +190,9 @@ export default function BuiltForEveryone() {
               )}
               <button
                 className="mt-2 px-5 py-2 bg-blue-600 text-white rounded-lg font-medium shadow hover:bg-blue-700 transition flex items-center gap-2"
-                onClick={() => openModal('signup')}
+                onClick={() => openModal("signup")}
               >
-                {tab === 'candidate' ? (
+                {tab === "candidate" ? (
                   <>
                     Start Your Journey <ArrowRight className="w-4 h-4" />
                   </>
@@ -176,7 +205,7 @@ export default function BuiltForEveryone() {
             </div>
             <div className="flex justify-center">
               <div className="glass bg-gradient-to-r from-blue-500/80 to-purple-500/80 text-white rounded-xl p-8 shadow-xl flex flex-col items-center w-full max-w-xs animate-fadeIn border border-white/20">
-                {tab === 'candidate' ? (
+                {tab === "candidate" ? (
                   <>
                     <AnimatedStat value={85} suffix="%" />
                     <span className="text-lg text-center">
