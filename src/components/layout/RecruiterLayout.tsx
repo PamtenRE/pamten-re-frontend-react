@@ -1,7 +1,7 @@
 // src/components/layout/RecruiterLayout.tsx
 'use client';
 
-import Sidebar from './Sidebar';
+//import Sidebar from './Sidebar';
 import React from 'react';
 
 interface RecruiterLayoutProps {
@@ -12,7 +12,7 @@ export default function RecruiterLayout({ children }: RecruiterLayoutProps) {
   return (
     <div className="flex h-screen w-full overflow-hidden">
       {/* Sidebar */}
-      <Sidebar />
+      {/* <Sidebar /> */}
 
       {/* Main Content */}
       <div className="flex flex-col flex-1 overflow-auto ml-60">
