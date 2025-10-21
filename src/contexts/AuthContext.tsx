@@ -9,18 +9,21 @@ interface User {
   role: string;
   profileCompleted: boolean;
   token?: string;
+
+  firstName?: string;
+  lastName?: string;
+  username?: string;
+  fullName?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  isAuthenticated: boolean; // ✅ new
-  profileProgress: number; // ✅ new
+  isAuthenticated: boolean;
   login: (userId: string, password: string) => Promise<void>;
   register: (formData: any) => Promise<void>;
   logout: () => void;
   setUser: (user: User | null) => void;
-  updateProfileProgress: (progress: number) => void; // ✅ new
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,44 +31,46 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // ✅ track auth
-  const [profileProgress, setProfileProgress] = useState(0); // ✅ track profile progress
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
 
-  // ✅ Load saved user/token on mount
+  // ✅ Load saved session on mount
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
     if (storedToken && storedUser) {
-      setToken(storedToken);
       const parsedUser = JSON.parse(storedUser);
       setUser(parsedUser);
+      setToken(storedToken);
       setIsAuthenticated(true);
-    }
-
-    // ✅ NEW: Load profile progress from localStorage
-    const savedProgress = localStorage.getItem("profileProgress");
-    if (savedProgress) {
-      setProfileProgress(parseInt(savedProgress));
     }
   }, []);
 
-  // ✅ Redirect effect (same logic)
+  // ✅ Redirect only from login/register/home
   useEffect(() => {
     if (!user) return;
 
     const role = user.role.toLowerCase();
-    const target =
-      role === "recruiter" && !user.profileCompleted
-        ? "/recruiter/profile"
-        : role === "recruiter"
-        ? "/recruiter/dashboard"
-        : "/candidate/home";
+    const currentPath = window.location.pathname;
 
-    router.push(target);
+    // Redirect only if user is coming from login, register, or home
+    if (
+      currentPath === "/login" ||
+      currentPath === "/register" ||
+      currentPath === "/"
+    ) {
+      const target =
+        role === "recruiter" && !user.profileCompleted
+          ? "/recruiter/profile"
+          : role === "recruiter"
+          ? "/recruiter/dashboard"
+          : "/candidate/dashboard";
+
+      router.push(target);
+    }
   }, [user, router]);
 
-  // ✅ Login updates user/token/isAuthenticated
+  // ✅ Login
   const login = async (userId: string, password: string) => {
     const data = await apiFetch("/api/auth/v1/login", {
       method: "POST",
@@ -86,8 +91,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     localStorage.setItem("token", data.token);
     localStorage.setItem("user", JSON.stringify(newUser));
+
+    const role = newUser.role.toLowerCase();
+    const target =
+      role === "recruiter" && !newUser.profileCompleted
+        ? "/recruiter/profile"
+        : role === "recruiter"
+        ? "/recruiter/dashboard"
+        : "/candidate/dashboard";
+    router.push(target);
   };
 
+  // ✅ Register
   const register = async (formData: any) => {
     await apiFetch("/api/auth/v1/register", {
       method: "POST",
@@ -96,21 +111,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push("/login?registered=1");
   };
 
+  // ✅ Logout
   const logout = () => {
     setUser(null);
     setToken(null);
     setIsAuthenticated(false);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    localStorage.removeItem("profileProgress"); // ✅ NEW
-    localStorage.removeItem("profileFormData"); // ✅ NEW
     router.push("/login");
   };
-  // ✅ NEW: Function to update profile progress
-  const updateProfileProgress = (progress: number) => {
-    setProfileProgress(progress);
-    localStorage.setItem("profileProgress", progress.toString());
-  };
+
+  // ✅ Auto logout on token expiry
+  useEffect(() => {
+    const handleUnauthorized = (event: CustomEvent) => {
+      if (event.detail?.status === 401) {
+        console.warn("Session expired. Logging out...");
+        logout();
+      }
+    };
+    window.addEventListener(
+      "unauthorized",
+      handleUnauthorized as EventListener
+    );
+    return () => {
+      window.removeEventListener(
+        "unauthorized",
+        handleUnauthorized as EventListener
+      );
+    };
+  }, []);
 
   return (
     <AuthContext.Provider
@@ -118,12 +147,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         token,
         isAuthenticated,
-        profileProgress, // ✅ NEW
         login,
         register,
         logout,
         setUser,
-        updateProfileProgress, // ✅ NEW
       }}
     >
       {children}

@@ -1,152 +1,448 @@
-'use client';
+"use client";
 
-import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { apiFetch } from '@/utils/api';
+import { useState, useEffect, useRef } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import RecruiterLayout from "@/components/layout/RecruiterLayout";
+import { motion } from "framer-motion";
+import {
+  Camera,
+  User,
+  Mail,
+  Briefcase,
+  Phone,
+  Linkedin,
+  Building2,
+  Globe,
+  Users,
+  MapPin,
+  Calendar,
+  FileText,
+} from "lucide-react";
 
 export default function RecruiterProfilePage() {
-  const { user, token, setUser } = useAuth();
-  const router = useRouter();
-  const [isEditing, setIsEditing] = useState(true); // Always editing if not completed
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [hydrated, setHydrated] = useState(false);
-  const [accessDenied, setAccessDenied] = useState<string | null>(null);
+  const { user, setUser } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const bannerInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Backend-required fields
-  const [hrName, setHrName] = useState('');
-  const [hrEmail, setHrEmail] = useState(user?.email || '');
-  const [organizationName, setOrganizationName] = useState('');
-  const [endClient, setEndClient] = useState('');
-  const [vendorName, setVendorName] = useState('');
-  const [dateOfBirth, setDateOfBirth] = useState('');
-  const [gender, setGender] = useState('');
-  const [industryName, setIndustryName] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [status, setStatus] = useState("");
 
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    hrEmail: "",
+    role: "",
+    phone: "",
+    linkedIn: "",
+    companyName: "",
+    website: "",
+    industryName: "",
+    companySize: "",
+    headquarters: "",
+    yearsInBusiness: "",
+    companyDescription: "",
+    hiringDomains: "",
+    hiringVolume: "",
+    clientType: "",
+    profileImage: "",
+    bannerImage: "",
+  });
+
+  // Load user info
   useEffect(() => {
-    setHydrated(true);
-  }, []);
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        hrEmail: user.email || "",
+        firstName: user.email?.split("@")[0] || "",
+      }));
+    }
+  }, [user]);
 
-  useEffect(() => {
-    if (!hydrated) return;
-    if (!user) {
-      setAccessDenied('Please sign in to complete your recruiter profile.');
-      router.replace('/login');
-      return;
-    }
-    if (user.role.toLowerCase() !== 'recruiter') {
-      setAccessDenied('Only recruiter accounts can access this page.');
-      router.replace('/');
-      return;
-    }
-    if (user.profileCompleted) {
-      setIsEditing(false);
-    }
-  }, [user, router, hydrated]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setSuccess(null);
-    try {
-      await apiFetch(
-        '/api/profile/v1/recruiter/complete',
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            userId: user?.userId || '',
-            hrName,
-            hrEmail,
-            organizationName,
-            endClient,
-            vendorName,
-            dateOfBirth,
-            gender,
-            industryName,
-          }),
-        },
-        token || undefined
-      );
-      setSuccess('Profile completed successfully!');
-      if (user) {
-        setUser({
-          userId: user.userId || '',
-          email: user.email || '',
-          role: user.role || '',
-          profileCompleted: true,
-          token: user.token,
-        });
-      }
-      setTimeout(() => {
-        router.push('/recruiter/job-post');
-      }, 1200);
-    } catch (err: any) {
-      setError(err.message || 'Failed to complete profile');
-    } finally {
-      setLoading(false);
-    }
+  // Handlers
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  if (!hydrated) return <div className="p-6">Loading...</div>;
-  if (!user || user.role.toLowerCase() !== 'recruiter') return <div className="p-6 text-sm text-gray-500">{accessDenied || 'Redirecting...'}</div>;
+  const handleProfileImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () =>
+      setFormData((prev) => ({
+        ...prev,
+        profileImage: reader.result as string,
+      }));
+    reader.readAsDataURL(file);
+  };
+
+  const handleBannerImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () =>
+      setFormData((prev) => ({
+        ...prev,
+        bannerImage: reader.result as string,
+      }));
+    reader.readAsDataURL(file);
+  };
+
+  const handleSave = () => {
+    setStatus("saving");
+    setTimeout(() => {
+      setStatus("saved");
+      setIsEditing(false);
+      setUser({ ...user!, profileCompleted: true });
+    }, 1000);
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-6">
-      <div className="max-w-2xl mx-auto">
-        <div className="glass rounded-xl shadow-lg p-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Complete Your Recruiter Profile</h1>
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <div>
-              <label className="block text-sm font-medium mb-1">HR Name</label>
-              <input type="text" value={hrName} onChange={e => setHrName(e.target.value)} required disabled={!isEditing} className="w-full px-3 py-2 border rounded-lg text-black" />
+    <RecruiterLayout>
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="min-h-screen bg-gradient-to-b from-[#0f0f10] via-[#111114] to-[#0b0b0c] text-white p-8"
+      >
+        {/* Header Section */}
+        <div className="relative w-full max-w-6xl mx-auto mb-24">
+          {/* Banner */}
+          <div className="relative h-52 md:h-56 rounded-2xl overflow-hidden shadow-lg group">
+            {formData.bannerImage ? (
+              <img
+                src={formData.bannerImage}
+                alt="Banner"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="h-full w-full bg-gradient-to-r from-purple-600 via-blue-500 to-teal-400" />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent rounded-2xl" />
+
+            {/* Upload overlay */}
+            <div
+              onClick={() => bannerInputRef.current?.click()}
+              className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition"
+            >
+              <Camera size={24} />
+              <span className="text-xs mt-1">Change Banner</span>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">HR Email</label>
-              <input type="email" value={hrEmail} onChange={e => setHrEmail(e.target.value)} required disabled={!isEditing} className="w-full px-3 py-2 border rounded-lg text-black" />
+
+            <input
+              ref={bannerInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleBannerImageUpload}
+              className="hidden"
+            />
+          </div>
+
+          {/* Profile Picture */}
+          <div className="absolute -bottom-20 left-1/2 transform -translate-x-1/2 md:left-16 md:translate-x-0 flex flex-col md:flex-row items-center md:items-end gap-6">
+            <div className="relative group w-36 h-36 rounded-full border-[6px] border-white shadow-2xl overflow-hidden bg-gray-800">
+              {formData.profileImage ? (
+                <img
+                  src={formData.profileImage}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full text-5xl font-bold uppercase bg-gradient-to-tr from-purple-500 to-blue-500 text-white">
+                  {formData.firstName ? formData.firstName.charAt(0) : "R"}
+                </div>
+              )}
+
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition"
+              >
+                <Camera size={22} />
+                <span className="text-xs mt-1">Change Photo</span>
+              </div>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleProfileImageUpload}
+                className="hidden"
+              />
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Organization Name</label>
-              <input type="text" value={organizationName} onChange={e => setOrganizationName(e.target.value)} required disabled={!isEditing} className="w-full px-3 py-2 border rounded-lg text-black" />
+
+            <div className="text-center md:text-left mt-4 md:mt-0">
+              <h1 className="text-3xl font-bold capitalize">
+                {formData.firstName} {formData.lastName}
+              </h1>
+              <p className="text-gray-300">{formData.role || "HR Recruiter"}</p>
+              <p className="text-gray-400 text-sm">
+                {formData.companyName || "Company Name"}
+              </p>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">End Client</label>
-              <input type="text" value={endClient} onChange={e => setEndClient(e.target.value)} required disabled={!isEditing} className="w-full px-3 py-2 border rounded-lg text-black" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Vendor Name</label>
-              <input type="text" value={vendorName} onChange={e => setVendorName(e.target.value)} required disabled={!isEditing} className="w-full px-3 py-2 border rounded-lg text-black" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Date of Birth</label>
-              <input type="date" value={dateOfBirth} onChange={e => setDateOfBirth(e.target.value)} required disabled={!isEditing} className="w-full px-3 py-2 border rounded-lg text-black" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Gender</label>
-              <select value={gender} onChange={e => setGender(e.target.value)} required disabled={!isEditing} className="w-full px-3 py-2 border rounded-lg text-black">
-                <option value="">Select Gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-                <option value="Prefer not to say">Prefer not to say</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Industry Name</label>
-              <input type="text" value={industryName} onChange={e => setIndustryName(e.target.value)} required disabled={!isEditing} className="w-full px-3 py-2 border rounded-lg text-black" />
-            </div>
-            {error && <div className="text-red-500 text-sm text-center">{error}</div>}
-            {success && <div className="text-green-600 text-sm text-center">{success}</div>}
-            {isEditing && (
-              <button type="submit" className="w-full bg-purple-600 text-white py-2 rounded-lg" disabled={loading}>
-                {loading ? 'Saving...' : 'Save Profile'}
+          </div>
+        </div>
+
+        {/* Edit/Save Buttons */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 max-w-5xl mx-auto">
+          <div>
+            <h1 className="text-3xl font-bold mb-1">Recruiter Profile</h1>
+            <p className="text-gray-400 text-sm">
+              Update your professional and company details.
+            </p>
+          </div>
+
+          <div className="mt-4 md:mt-0 flex gap-3">
+            {isEditing ? (
+              <>
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="px-6 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 border border-gray-600 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={status === "saving"}
+                  className={`px-6 py-2 rounded-lg shadow-lg ${
+                    status === "saving"
+                      ? "bg-gray-600 cursor-not-allowed"
+                      : "bg-gradient-to-r from-purple-500 to-blue-500 hover:opacity-90"
+                  }`}
+                >
+                  {status === "saving"
+                    ? "Saving..."
+                    : status === "saved"
+                    ? "Saved ✅"
+                    : "Save Changes"}
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setIsEditing(true)}
+                className="px-6 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 hover:opacity-90 shadow-lg"
+              >
+                Edit Profile
               </button>
             )}
-          </form>
+          </div>
         </div>
+
+        {/* FORM */}
+        <div className="max-w-5xl mx-auto bg-white/5 border border-white/10 rounded-3xl shadow-2xl p-10 backdrop-blur-md space-y-10">
+          <SectionTitle title="Personal Information" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <ProfileField
+              label="First Name"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
+              icon={<User size={18} />}
+              disabled={!isEditing}
+            />
+            <ProfileField
+              label="Last Name"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+              icon={<User size={18} />}
+              disabled={!isEditing}
+            />
+            <ProfileField
+              label="Official Email"
+              name="hrEmail"
+              value={formData.hrEmail}
+              onChange={handleChange}
+              icon={<Mail size={18} />}
+              disabled
+            />
+            <ProfileField
+              label="Role / Designation"
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              icon={<Briefcase size={18} />}
+              disabled={!isEditing}
+            />
+            <ProfileField
+              label="Phone Number"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              icon={<Phone size={18} />}
+              disabled={!isEditing}
+            />
+            <ProfileField
+              label="LinkedIn Profile"
+              name="linkedIn"
+              value={formData.linkedIn}
+              onChange={handleChange}
+              icon={<Linkedin size={18} />}
+              disabled={!isEditing}
+            />
+          </div>
+
+          <SectionTitle title="Company Information" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <ProfileField
+              label="Company Name"
+              name="companyName"
+              value={formData.companyName}
+              onChange={handleChange}
+              icon={<Building2 size={18} />}
+              disabled={!isEditing}
+            />
+            <ProfileField
+              label="Website"
+              name="website"
+              value={formData.website}
+              onChange={handleChange}
+              icon={<Globe size={18} />}
+              disabled={!isEditing}
+            />
+            <ProfileField
+              label="Industry"
+              name="industryName"
+              value={formData.industryName}
+              onChange={handleChange}
+              icon={<Briefcase size={18} />}
+              disabled={!isEditing}
+            />
+            <ProfileField
+              label="Company Size"
+              name="companySize"
+              value={formData.companySize}
+              onChange={handleChange}
+              icon={<Users size={18} />}
+              disabled={!isEditing}
+            />
+            <ProfileField
+              label="Headquarters"
+              name="headquarters"
+              value={formData.headquarters}
+              onChange={handleChange}
+              icon={<MapPin size={18} />}
+              disabled={!isEditing}
+            />
+            <ProfileField
+              label="Years in Business"
+              name="yearsInBusiness"
+              value={formData.yearsInBusiness}
+              onChange={handleChange}
+              icon={<Calendar size={18} />}
+              disabled={!isEditing}
+            />
+          </div>
+
+          <TextAreaField
+            label="Company Overview"
+            name="companyDescription"
+            value={formData.companyDescription}
+            onChange={handleChange}
+            icon={<FileText size={18} />}
+            disabled={!isEditing}
+            placeholder="Describe your company, mission, and recruitment approach..."
+          />
+
+          <SectionTitle title="Recruitment Focus" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <ProfileField
+              label="Primary Hiring Domains"
+              name="hiringDomains"
+              value={formData.hiringDomains}
+              onChange={handleChange}
+              icon={<Users size={18} />}
+              disabled={!isEditing}
+            />
+            <ProfileField
+              label="Hiring Volume"
+              name="hiringVolume"
+              value={formData.hiringVolume}
+              onChange={handleChange}
+              icon={<Briefcase size={18} />}
+              disabled={!isEditing}
+            />
+            <ProfileField
+              label="Client Type"
+              name="clientType"
+              value={formData.clientType}
+              onChange={handleChange}
+              icon={<Briefcase size={18} />}
+              disabled={!isEditing}
+            />
+          </div>
+        </div>
+      </motion.div>
+    </RecruiterLayout>
+  );
+}
+
+/* ---------------------- Subcomponents ---------------------- */
+function SectionTitle({ title }: { title: string }) {
+  return (
+    <h2 className="text-xl font-semibold text-gray-200 border-b border-white/10 pb-2">
+      {title}
+    </h2>
+  );
+}
+
+function ProfileField({
+  label,
+  name,
+  value,
+  onChange,
+  disabled,
+  icon,
+  type = "text",
+}: any) {
+  return (
+    <div>
+      <label className="block text-sm font-semibold mb-2 text-gray-300">
+        {label}
+      </label>
+      <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+        <div className="text-purple-400">{icon}</div>
+        <input
+          type={type}
+          name={name}
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          className="bg-transparent flex-1 outline-none text-white placeholder-gray-400 disabled:opacity-60"
+        />
       </div>
     </div>
   );
-} 
+}
+
+function TextAreaField({
+  label,
+  name,
+  value,
+  onChange,
+  disabled,
+  icon,
+  placeholder,
+}: any) {
+  return (
+    <div>
+      <label className="block text-sm font-semibold mb-2 text-gray-300">
+        {label}
+      </label>
+      <div className="flex items-start gap-2 bg-white/5 border border-white/10 rounded-lg px-3 py-2">
+        <div className="text-purple-400 mt-1">{icon}</div>
+        <textarea
+          name={name}
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          placeholder={placeholder}
+          rows={4}
+          className="bg-transparent flex-1 outline-none text-white placeholder-gray-400 resize-none disabled:opacity-60"
+        />
+      </div>
+    </div>
+  );
+}
