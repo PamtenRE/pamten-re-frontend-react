@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import dynamic from "next/dynamic";
 import {
   Globe,
   Building2,
@@ -14,8 +13,6 @@ import {
 import CategorySelect from "./CategorySelect";
 import JobTypeChips from "./JobTypeChips";
 import SalaryControls from "./SalaryControls";
-
-// ✅ Use your new shared RichTextEditor (with sticky toolbar + scroll)
 import RichTextEditor from "./RichTextEditor";
 
 export type EditJobFormData = {
@@ -75,9 +72,7 @@ export default function EditJobForm({
   const handleChange = <K extends keyof EditJobFormData>(
     key: K,
     value: EditJobFormData[K]
-  ) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
-  };
+  ) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,7 +90,8 @@ export default function EditJobForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-8 max-w-6xl mx-auto p-6 text-white"
+      className="space-y-8 max-w-6xl mx-auto p-6 
+                 text-gray-800 dark:text-gray-100 transition-colors duration-500"
     >
       {/* 🏷️ Job Basics */}
       <GlassCard>
@@ -106,7 +102,11 @@ export default function EditJobForm({
             <select
               value={form.country}
               onChange={(e) => handleChange("country", e.target.value)}
-              className="w-full p-3 rounded-lg bg-white/10 border border-white/10 focus:ring-2 focus:ring-purple-500"
+              className="w-full p-3 rounded-lg border 
+                         bg-white dark:bg-white/10 
+                         border-gray-300 dark:border-white/10 
+                         text-gray-800 dark:text-white 
+                         focus:ring-2 focus:ring-purple-500"
             >
               <option value="">Select a country…</option>
               {COUNTRIES.map((c) => (
@@ -123,7 +123,11 @@ export default function EditJobForm({
               type="text"
               value={form.language}
               onChange={(e) => handleChange("language", e.target.value)}
-              className="w-full p-3 rounded-lg bg-white/10 border border-white/10 focus:ring-2 focus:ring-purple-500"
+              className="w-full p-3 rounded-lg border 
+                         bg-white dark:bg-white/10 
+                         border-gray-300 dark:border-white/10 
+                         text-gray-800 dark:text-white 
+                         focus:ring-2 focus:ring-purple-500"
             />
           </div>
 
@@ -133,7 +137,11 @@ export default function EditJobForm({
               type="text"
               value={form.company}
               onChange={(e) => handleChange("company", e.target.value)}
-              className="w-full p-3 rounded-lg bg-white/10 border border-white/10 focus:ring-2 focus:ring-purple-500"
+              className="w-full p-3 rounded-lg border 
+                         bg-white dark:bg-white/10 
+                         border-gray-300 dark:border-white/10 
+                         text-gray-800 dark:text-white 
+                         focus:ring-2 focus:ring-purple-500"
             />
           </div>
 
@@ -143,7 +151,11 @@ export default function EditJobForm({
               type="text"
               value={form.title}
               onChange={(e) => handleChange("title", e.target.value)}
-              className="w-full p-3 rounded-lg bg-white/10 border border-white/10 focus:ring-2 focus:ring-purple-500"
+              className="w-full p-3 rounded-lg border 
+                         bg-white dark:bg-white/10 
+                         border-gray-300 dark:border-white/10 
+                         text-gray-800 dark:text-white 
+                         focus:ring-2 focus:ring-purple-500"
             />
           </div>
 
@@ -155,13 +167,16 @@ export default function EditJobForm({
             />
           </div>
 
-          {/* ✅ Location Type */}
           <div>
             <LabelRow icon={<MapPin size={16} />} label="Location Type *" />
             <select
               value={form.locationType}
               onChange={(e) => handleChange("locationType", e.target.value)}
-              className="w-full p-3 rounded-lg bg-white/10 border border-white/10 focus:ring-2 focus:ring-purple-500"
+              className="w-full p-3 rounded-lg border 
+                         bg-white dark:bg-white/10 
+                         border-gray-300 dark:border-white/10 
+                         text-gray-800 dark:text-white 
+                         focus:ring-2 focus:ring-purple-500"
             >
               <option value="On-site">On-site</option>
               <option value="Hybrid">Hybrid</option>
@@ -178,7 +193,11 @@ export default function EditJobForm({
               placeholder="City, State / Region"
               value={form.location}
               onChange={(e) => handleChange("location", e.target.value)}
-              className="w-full p-3 rounded-lg bg-white/10 border border-white/10 focus:ring-2 focus:ring-purple-500"
+              className="w-full p-3 rounded-lg border 
+                         bg-white dark:bg-white/10 
+                         border-gray-300 dark:border-white/10 
+                         text-gray-800 dark:text-white 
+                         focus:ring-2 focus:ring-purple-500"
             />
           </div>
 
@@ -205,9 +224,15 @@ export default function EditJobForm({
             icon={<Upload size={16} />}
             label="Attach a file (optional)"
           />
-          <label className="mt-2 flex items-center gap-3 px-4 py-3 rounded-xl border border-white/10 bg-white/10 hover:bg-white/15 cursor-pointer transition">
-            <Upload size={18} className="text-purple-300" />
-            <span className="text-sm text-gray-300">
+          <label
+            className="mt-2 flex items-center gap-3 px-4 py-3 rounded-xl border 
+                       bg-white dark:bg-white/10 
+                       border-gray-300 dark:border-white/10 
+                       hover:bg-gray-50 dark:hover:bg-white/15 
+                       cursor-pointer transition"
+          >
+            <Upload size={18} className="text-purple-500" />
+            <span className="text-sm text-gray-700 dark:text-gray-300">
               {form.attachmentName || "Choose a file…"}
             </span>
             <input
@@ -224,8 +249,8 @@ export default function EditJobForm({
             />
           </label>
           {form.attachmentName && (
-            <p className="text-xs text-gray-400 mt-2 flex items-center gap-2">
-              <CheckCircle2 size={14} className="text-green-400" />
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 flex items-center gap-2">
+              <CheckCircle2 size={14} className="text-green-500" />
               Attached: {form.attachmentName}
             </p>
           )}
@@ -249,15 +274,18 @@ export default function EditJobForm({
           disabled={form.hideSalary}
         />
 
-        <div className="mt-4 flex items-center gap-3 bg-white/5 p-3 rounded-lg border border-white/10">
+        <div className="mt-4 flex items-center gap-3 bg-gray-50 dark:bg-white/5 p-3 rounded-lg border border-gray-200 dark:border-white/10">
           <input
             type="checkbox"
             id="hideSalary"
             checked={form.hideSalary}
             onChange={(e) => handleChange("hideSalary", e.target.checked)}
-            className="h-4 w-4 accent-purple-500 rounded focus:ring-2 focus:ring-purple-400"
+            className="h-4 w-4 accent-purple-600 rounded focus:ring-2 focus:ring-purple-400"
           />
-          <label htmlFor="hideSalary" className="text-sm text-gray-300">
+          <label
+            htmlFor="hideSalary"
+            className="text-sm text-gray-700 dark:text-gray-300"
+          >
             Prefer not to disclose salary
           </label>
         </div>
@@ -268,7 +296,8 @@ export default function EditJobForm({
         <button
           type="button"
           onClick={() => router.back()}
-          className="px-6 py-3 rounded-xl border border-gray-600 text-gray-300 hover:bg-gray-800 transition"
+          className="px-6 py-3 rounded-xl border border-gray-300 dark:border-gray-600 
+                     text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
         >
           Cancel
         </button>
@@ -306,14 +335,23 @@ function LabelRow({ label, icon }: { label: string; icon?: React.ReactNode }) {
   return (
     <div className="mb-2 flex items-center gap-2">
       {icon}
-      <span className="text-sm font-medium text-gray-200">{label}</span>
+      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        {label}
+      </span>
     </div>
   );
 }
 
 function GlassCard({ children }: { children: React.ReactNode }) {
   return (
-    <div className="p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md shadow-[0_0_25px_rgba(124,58,237,0.1)] space-y-4">
+    <div
+      className="p-6 rounded-2xl border 
+                 bg-white/80 dark:bg-white/5 
+                 border-gray-200 dark:border-white/10 
+                 shadow-[0_4px_20px_rgba(0,0,0,0.05)] 
+                 dark:shadow-[0_0_25px_rgba(124,58,237,0.1)] 
+                 backdrop-blur-xl space-y-4 transition-all duration-300"
+    >
       {children}
     </div>
   );

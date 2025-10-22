@@ -43,20 +43,20 @@ export default function Navbar() {
   };
 
   const handleProfileClick = () => {
-    if (user?.role === "recruiter") {
+    if (!user) return; // don't navigate until user loaded
+    if (user.role?.toLowerCase() === "recruiter") {
       router.push("/recruiter/profile");
-    } else {
-      // Handle candidate profile route
+    } else if (user.role?.toLowerCase() === "candidate") {
       router.push("/candidate/profile");
     }
     setShowProfileMenu(false);
   };
 
   const handleDashboardClick = () => {
-    if (user?.role === "recruiter") {
+    if (!user) return; // don't navigate until user loaded
+    if (user.role?.toLowerCase() === "recruiter") {
       router.push("/recruiter/dashboard");
-    } else {
-      // Handle candidate dashboard route
+    } else if (user.role?.toLowerCase() === "candidate") {
       router.push("/candidate/dashboard");
     }
     setShowProfileMenu(false);
@@ -114,7 +114,7 @@ export default function Navbar() {
             </button>
 
             {showProfileMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-[9999]">
+              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-[99999] pointer-events-auto">
                 <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
                   <p className="text-sm font-medium text-gray-900 dark:text-white">
                     {user?.email}

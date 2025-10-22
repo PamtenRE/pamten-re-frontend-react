@@ -297,243 +297,215 @@ export default function CreateJobWizard({
   const progress = ((step + 1) / steps.length) * 100;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <div className="md:col-span-2 space-y-8">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+      {/* === LEFT SIDE: FORM === */}
+      <div className="md:col-span-2 space-y-10">
         {/* Progress bar */}
-        <div className="relative w-full h-2 bg-gray-700/40 rounded-full overflow-hidden">
+        <div className="relative w-full h-2 bg-white/10 dark:bg-gray-700/40 rounded-full overflow-hidden shadow-inner">
           <div
-            className="absolute left-0 top-0 h-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-500"
+            className="absolute left-0 top-0 h-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-blue-500 transition-all duration-500"
             style={{ width: `${progress}%` }}
           />
         </div>
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-            {mode === "edit" ? "Edit Job" : steps[step]}
-          </h2>
-          <span className="text-sm text-gray-400">
+
+        {/* Title & Step indicator */}
+        <div className="relative mt-4 mb-6">
+          {/* Step Indicator */}
+          <span className="absolute right-0 top-[-22px] text-sm text-gray-500">
             Step {step + 1} of {steps.length}
           </span>
+
+          {/* Section Title */}
+          <h2
+            className="text-3xl font-extrabold bg-gradient-to-r from-indigo-500 via-purple-500 to-blue-500 
+                 text-transparent bg-clip-text tracking-tight mt-4"
+          >
+            {mode === "edit" ? "Edit Job" : steps[step]}
+          </h2>
         </div>
-        {/* STEP 0 */}
-        {step === 0 && (
-          <section className="space-y-6">
-            <GlassCard ref={refs.country}>
-              <LabelRow icon={<Globe size={16} />} label="Country *" />
-              <select
-                className={inputCls(!!errors.country)}
-                value={data.country}
-                onChange={(e) => update("country", e.target.value)}
-              >
-                <option value="">Select a country…</option>
-                {COUNTRIES.map((c) => (
-                  <option key={c} value={c} className="bg-neutral-900">
-                    {c}
-                  </option>
-                ))}
-              </select>
-              <FieldError message={errors.country} />
-            </GlassCard>
 
-            <GlassCard>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div ref={refs.language}>
-                  <LabelRow icon={<Languages size={16} />} label="Language" />
-                  <FormInput
-                    invalid={!!errors.language}
-                    value={data.language}
-                    onChange={(e) => update("language", e.target.value)}
-                  />
-                  <FieldError message={errors.language} />
-                </div>
-
-                <div ref={refs.company}>
-                  <LabelRow
-                    icon={<Building2 size={16} />}
-                    label="Company name *"
-                  />
-                  <FormInput
-                    invalid={!!errors.company}
-                    value={data.company}
-                    onChange={(e) => update("company", e.target.value)}
-                    placeholder="Your Company"
-                  />
-                  <FieldError message={errors.company} />
-                </div>
-              </div>
-            </GlassCard>
-
-            <GlassCard ref={refs.title}>
-              <LabelRow label="Job title *" />
-              <FormInput
-                invalid={!!errors.title}
-                value={data.title}
-                onChange={(e) => update("title", e.target.value)}
-                placeholder="Ex. Frontend Developer"
-              />
-              <FieldError message={errors.title} />
-            </GlassCard>
-
-            <GlassCard ref={refs.category}>
-              <LabelRow label="Category *" />
-              <CategorySelect
-                value={data.category}
-                onChange={(v) => update("category", v)}
-              />
-              <FieldError message={errors.category} />
-            </GlassCard>
-
-            <GlassCard ref={refs.locationType}>
-              <LabelRow label="Job Location *" />
-              <LocationTypeRadios
-                value={data.locationType}
-                onChange={(v) => update("locationType", v)}
-              />
-              <FieldError message={errors.locationType} />
-              {data.locationType !== "remote" && (
-                <div className="mt-4" ref={refs.location}>
-                  <FormInput
-                    invalid={!!errors.location}
-                    value={data.location}
-                    onChange={(e) => update("location", e.target.value)}
-                    placeholder="City, State / Region"
-                  />
-                  <FieldError message={errors.location} />
-                </div>
-              )}
-            </GlassCard>
-
-            <GlassCard ref={refs.employmentType}>
-              <LabelRow label="Employment Type *" />
-              <JobTypeChips
-                value={data.employmentType}
-                onChange={(v) => update("employmentType", v as any)}
-              />
-              <FieldError message={errors.employmentType} />
-            </GlassCard>
-          </section>
-        )}
-        {/* STEP 1 */}
-        {step === 1 && (
-          <section className="space-y-6">
-            <GlassCard ref={refs.description}>
-              <LabelRow label="Job description *" />
-
-              {/* ✅ Rich Text Editor */}
-              <div className="bg-white rounded-lg overflow-hidden text-black">
-                <RichTextEditor
-                  value={data.description}
-                  onChange={(v) => update("description", v)}
-                />
-              </div>
-
-              <FieldError message={errors.description} />
-            </GlassCard>
-
-            <GlassCard>
-              <LabelRow
-                icon={<Upload size={16} />}
-                label="Upload a file (optional)"
-              />
-              <label className="mt-2 flex items-center gap-3 px-4 py-3 rounded-xl border border-white/10 bg-white/10 hover:bg-white/15 cursor-pointer transition">
-                <Upload size={18} className="text-purple-300" />
-                <span className="text-sm text-gray-300">
-                  {data.attachmentName || "Choose a file…"}
-                </span>
-                <input
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      update("attachmentName", file.name);
-                      update("attachmentFile", file);
-                    }
-                  }}
-                />
-              </label>
-              {data.attachmentName && (
-                <p className="text-xs text-gray-400 mt-2 flex items-center gap-2">
-                  <CheckCircle2 size={14} className="text-green-400" />
-                  Attached: {data.attachmentName}
-                </p>
-              )}
-            </GlassCard>
-          </section>
-        )}
-        {/* STEP 2 */}
-        {step === 2 && (
-          <section className="space-y-6">
-            <GlassCard ref={refs.pay}>
-              <SalaryControls
-                payType={data.payType}
-                setPayType={(v) => update("payType", v)}
-                salaryMin={data.salaryMin}
-                setSalaryMin={(v) => update("salaryMin", v)}
-                salaryMax={data.salaryMax}
-                setSalaryMax={(v) => update("salaryMax", v)}
-                payExact={data.payExact}
-                setPayExact={(v) => update("payExact", v)}
-                rateUnit={data.rateUnit}
-                setRateUnit={(v) => update("rateUnit", v)}
-                disabled={data.hideSalary}
-              />
-              <FieldError message={errors.pay} />
-            </GlassCard>
-
-            <GlassCard>
-              <div className="mt-5 flex items-center gap-3 bg-white/5 p-3 rounded-lg border border-white/10 hover:bg-white/10 transition">
-                <input
-                  type="checkbox"
-                  id="hideSalary"
-                  checked={!!data.hideSalary}
-                  onChange={(e) => update("hideSalary", e.target.checked)}
-                  className="h-4 w-4 accent-purple-500 rounded focus:ring-2 focus:ring-purple-400 cursor-pointer"
-                />
-                <label
-                  htmlFor="hideSalary"
-                  className="text-sm text-gray-300 cursor-pointer select-none"
+        {/* === FORM STEPS === */}
+        <div
+          className="p-6 md:p-8 mt-4 rounded-2xl border border-white/10
+          bg-gradient-to-br from-white/60 via-white/70 to-white/60 
+          dark:from-[#1a0739]/40 dark:via-[#2b0f5a]/40 dark:to-[#0a0a2a]/40
+          shadow-[0_8px_32px_rgba(0,0,0,0.1)] backdrop-blur-2xl transition-all duration-500"
+        >
+          {/* Step content */}
+          {step === 0 && (
+            <section className="space-y-8">
+              <GlassCard ref={refs.country}>
+                <LabelRow icon={<Globe size={16} />} label="Country *" />
+                <select
+                  className={inputCls(!!errors.country)}
+                  value={data.country}
+                  onChange={(e) => update("country", e.target.value)}
                 >
-                  Prefer not to disclose salary
-                </label>
-              </div>
-            </GlassCard>
-          </section>
-        )}
-        {/* STEP 3 */}
-        {step === 3 && (
-          <section className="space-y-6">
-            <GlassCard>
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="text-lg font-semibold text-white">
-                    Final Review
-                  </h3>
-                  <p className="text-sm text-gray-400">
-                    Preview how candidates will see your listing.
-                  </p>
+                  <option value="">Select a country…</option>
+                  {COUNTRIES.map((c) => (
+                    <option
+                      key={c}
+                      value={c}
+                      className="bg-gray-900 text-white"
+                    >
+                      {c}
+                    </option>
+                  ))}
+                </select>
+                <FieldError message={errors.country} />
+              </GlassCard>
+
+              <GlassCard>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div ref={refs.language}>
+                    <LabelRow icon={<Languages size={16} />} label="Language" />
+                    <FormInput
+                      invalid={!!errors.language}
+                      value={data.language}
+                      onChange={(e) => update("language", e.target.value)}
+                    />
+                    <FieldError message={errors.language} />
+                  </div>
+
+                  <div ref={refs.company}>
+                    <LabelRow
+                      icon={<Building2 size={16} />}
+                      label="Company name *"
+                    />
+                    <FormInput
+                      invalid={!!errors.company}
+                      value={data.company}
+                      onChange={(e) => update("company", e.target.value)}
+                      placeholder="Your Company"
+                    />
+                    <FieldError message={errors.company} />
+                  </div>
                 </div>
-                <button
-                  className="px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg text-white hover:opacity-90 transition"
-                  onClick={() => setPreviewOpen(true)}
-                >
-                  Open Preview
-                </button>
-              </div>
-            </GlassCard>
-          </section>
-        )}
-        {error && <div className="text-red-500 mt-4">{error}</div>}
+              </GlassCard>
+
+              <GlassCard ref={refs.title}>
+                <LabelRow label="Job title *" />
+                <FormInput
+                  invalid={!!errors.title}
+                  value={data.title}
+                  onChange={(e) => update("title", e.target.value)}
+                  placeholder="Ex. Frontend Developer"
+                />
+                <FieldError message={errors.title} />
+              </GlassCard>
+
+              <GlassCard ref={refs.category}>
+                <LabelRow label="Category *" />
+                <CategorySelect
+                  value={data.category}
+                  onChange={(v) => update("category", v)}
+                />
+                <FieldError message={errors.category} />
+              </GlassCard>
+
+              <GlassCard ref={refs.locationType}>
+                <LabelRow label="Job Location *" />
+                <LocationTypeRadios
+                  value={data.locationType}
+                  onChange={(v) => update("locationType", v)}
+                />
+                <FieldError message={errors.locationType} />
+                {data.locationType !== "remote" && (
+                  <div className="mt-4" ref={refs.location}>
+                    <FormInput
+                      invalid={!!errors.location}
+                      value={data.location}
+                      onChange={(e) => update("location", e.target.value)}
+                      placeholder="City, State / Region"
+                    />
+                    <FieldError message={errors.location} />
+                  </div>
+                )}
+              </GlassCard>
+
+              <GlassCard ref={refs.employmentType}>
+                <LabelRow label="Employment Type *" />
+                <JobTypeChips
+                  value={data.employmentType}
+                  onChange={(v) => update("employmentType", v as any)}
+                />
+                <FieldError message={errors.employmentType} />
+              </GlassCard>
+            </section>
+          )}
+
+          {step === 1 && (
+            <section className="space-y-6">
+              <GlassCard ref={refs.description}>
+                <LabelRow label="Job description *" />
+                <div className="bg-white dark:bg-[#18181b] rounded-lg overflow-hidden text-black dark:text-white">
+                  <RichTextEditor
+                    value={data.description}
+                    onChange={(v) => update("description", v)}
+                  />
+                </div>
+                <FieldError message={errors.description} />
+              </GlassCard>
+            </section>
+          )}
+
+          {step === 2 && (
+            <section className="space-y-6">
+              <GlassCard ref={refs.pay}>
+                <SalaryControls
+                  payType={data.payType}
+                  setPayType={(v) => update("payType", v)}
+                  salaryMin={data.salaryMin}
+                  setSalaryMin={(v) => update("salaryMin", v)}
+                  salaryMax={data.salaryMax}
+                  setSalaryMax={(v) => update("salaryMax", v)}
+                  payExact={data.payExact}
+                  setPayExact={(v) => update("payExact", v)}
+                  rateUnit={data.rateUnit}
+                  setRateUnit={(v) => update("rateUnit", v)}
+                  disabled={data.hideSalary}
+                />
+                <FieldError message={errors.pay} />
+              </GlassCard>
+            </section>
+          )}
+
+          {step === 3 && (
+            <section className="space-y-6">
+              <GlassCard>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">
+                      Final Review
+                    </h3>
+                    <p className="text-sm text-gray-400">
+                      Preview how candidates will see your listing.
+                    </p>
+                  </div>
+                  <button
+                    className="px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg text-white hover:opacity-90 transition"
+                    onClick={() => setPreviewOpen(true)}
+                  >
+                    Open Preview
+                  </button>
+                </div>
+              </GlassCard>
+            </section>
+          )}
+
+          {error && <div className="text-red-500 mt-4">{error}</div>}
+        </div>
+
         {/* Buttons */}
-        <div className="mt-8 flex justify-between">
+        <div className="mt-10 flex justify-between">
           <button
-            className="px-5 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-white text-sm transition"
+            className="px-5 py-2 rounded-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-800 dark:text-white text-sm transition"
             onClick={() => (step > 0 ? setStep(step - 1) : router.back())}
           >
             Back
           </button>
           <button
-            className="px-5 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white font-medium hover:opacity-90 transition"
+            className="px-6 py-2 rounded-lg bg-gradient-to-r from-purple-600 via-fuchsia-500 to-blue-600 text-white font-medium shadow-[0_0_15px_rgba(147,51,234,0.4)] hover:shadow-[0_0_30px_rgba(147,51,234,0.6)] transition"
             onClick={() =>
               step < steps.length - 1 ? handleNext() : handleSubmit(data.status)
             }
@@ -549,8 +521,11 @@ export default function CreateJobWizard({
         </div>
       </div>
 
-      {/* Summary & Preview */}
-      <DynamicJobSummary data={summary} />
+      {/* === RIGHT SIDE: JOB SUMMARY === */}
+      <div className="sticky top-24 mt-20">
+        <DynamicJobSummary data={summary} />
+      </div>
+
       <PreviewModal
         open={previewOpen}
         onClose={() => setPreviewOpen(false)}
@@ -612,13 +587,22 @@ function stepIndexForField(field: string): number {
 /* ===========================
    UI helpers
 =========================== */
+// Better input styles for visibility (light + dark)
 const inputBase =
-  "w-full px-3 py-2 rounded-lg bg-white/10 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500";
-const inputError = "border-red-400 focus:ring-red-500";
+  "w-full px-3 py-2 rounded-lg text-sm transition duration-300 " +
+  "bg-white text-gray-800 placeholder-gray-500 " +
+  "border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500 " +
+  "dark:bg-[#1b1033]/70 dark:text-gray-100 dark:placeholder-gray-400 " +
+  "dark:border-white/10 dark:focus:ring-purple-400";
+
+const inputError =
+  "border-red-400 focus:ring-red-500 focus:ring-2 focus:border-transparent";
+
 function inputCls(invalid?: boolean) {
   return invalid ? `${inputBase} ${inputError}` : inputBase;
 }
 
+// Glass-style card with subtle contrast for light theme
 const GlassCard = React.forwardRef<
   HTMLDivElement,
   { children: React.ReactNode }
@@ -626,7 +610,12 @@ const GlassCard = React.forwardRef<
   return (
     <div
       ref={ref}
-      className="p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md shadow-[0_0_25px_rgba(124,58,237,0.1)]"
+      className="p-6 rounded-2xl border backdrop-blur-xl transition-all duration-300
+      bg-gradient-to-br from-[#ffffffcc] via-[#faf5ffcc] to-[#e9e4ffcc]
+      border-gray-200 shadow-[0_8px_32px_rgba(99,102,241,0.08)]
+      hover:shadow-[0_0_25px_rgba(147,51,234,0.15)]
+      dark:from-[#1a0739]/70 dark:via-[#2b0f5a]/70 dark:to-[#0a0a2a]/70
+      dark:border-white/10 dark:shadow-[0_0_25px_rgba(124,58,237,0.25)]"
     >
       {children}
     </div>
@@ -637,7 +626,9 @@ function LabelRow({ label, icon }: { label: string; icon?: React.ReactNode }) {
   return (
     <div className="mb-2 flex items-center gap-2">
       {icon}
-      <div className="text-sm font-medium text-gray-200">{label}</div>
+      <div className="text-sm font-medium text-gray-700 dark:text-gray-200">
+        {label}
+      </div>
     </div>
   );
 }

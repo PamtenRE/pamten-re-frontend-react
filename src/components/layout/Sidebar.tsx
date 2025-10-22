@@ -3,13 +3,22 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Briefcase, Users, ClipboardList, LogOut } from "lucide-react";
+import {
+  Briefcase,
+  Users,
+  ClipboardList,
+  ClipboardCheck,
+  LogOut,
+  PanelLeftClose,
+  PanelLeftOpen,
+} from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 
 const iconMap: Record<string, React.ReactNode> = {
   Briefcase: <Briefcase size={20} strokeWidth={1.8} />,
   ClipboardList: <ClipboardList size={20} strokeWidth={1.8} />,
+  ClipboardCheck: <ClipboardCheck size={20} strokeWidth={1.8} />,
   Users: <Users size={20} strokeWidth={1.8} />,
 };
 
@@ -19,7 +28,12 @@ interface NavLink {
   icon: keyof typeof iconMap;
 }
 
-export default function Sidebar({ collapsed }: { collapsed: boolean }) {
+interface SidebarProps {
+  collapsed: boolean;
+  setCollapsed: (collapsed: boolean) => void;
+}
+
+export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
   const pathname = usePathname();
   const { logout } = useAuth();
   const router = useRouter();
@@ -34,13 +48,15 @@ export default function Sidebar({ collapsed }: { collapsed: boolean }) {
         return res.json();
       })
       .then((data) => {
-        // ✅ Add “Applications” here so it behaves the same as other links
+        const filtered = (data.links || []).filter(
+          (link: any) => link.name.toLowerCase() !== "recruitedge"
+        );
         const allLinks = [
-          ...(data.links || []),
+          ...filtered,
           {
             name: "Applications",
             href: "/recruiter/applications",
-            icon: "ClipboardList" as keyof typeof iconMap,
+            icon: "ClipboardCheck" as keyof typeof iconMap,
           },
         ];
         setNavLinks(allLinks);
@@ -54,21 +70,47 @@ export default function Sidebar({ collapsed }: { collapsed: boolean }) {
 
   return (
     <aside
-      className={`fixed left-0 z-40 flex flex-col justify-between items-center 
-      bg-gradient-to-b from-zinc-950/95 to-zinc-900/90 backdrop-blur-xl border-r border-zinc-800/60
-      transition-all duration-500 ease-in-out shadow-[0_0_25px_rgba(0,0,0,0.25)]
-      ${collapsed ? "w-20" : "w-60"}`}
-      style={{ top: "70px", height: "calc(100vh - 70px)" }}
+      className={`fixed left-0 z-40 flex flex-col justify-between
+      backdrop-blur-xl transition-all duration-300 ease-in-out
+      shadow-[var(--sidebar-shadow)]
+      ${collapsed ? "w-20" : "w-60"}
+      border-r border-[var(--sidebar-border)]`}
+      style={{
+        background: "var(--sidebar-bg)",
+        top: "70px",
+        height: "calc(100vh - 70px)",
+      }}
     >
-      {/* Nav Section */}
-      <nav className="flex flex-col items-center justify-start w-full mt-6 space-y-2 px-3">
+      {/* Header with Logo + Collapse Button */}
+      <div
+        className={`flex items-center justify-between w-full px-4 pt-4 ${
+          collapsed ? "flex-col gap-2" : ""
+        }`}
+      >
+        {/* Collapse Toggle */}
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="p-2 rounded-lg hover:bg-[var(--sidebar-hover)] transition-all text-[var(--sidebar-text)]"
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {collapsed ? (
+            <PanelLeftOpen size={28} />
+          ) : (
+            <PanelLeftClose size={28} />
+          )}
+        </button>
+      </div>
+
+      {/* Nav Links */}
+      <nav className="flex flex-col items-center justify-start w-full mt-6 space-y-2 px-3 flex-1 overflow-y-auto">
         {loading ? (
-          <div className="text-gray-400 py-4 text-sm">Loading...</div>
+          <div className="text-[var(--sidebar-text)]/60 py-4 text-sm">
+            Loading...
+          </div>
         ) : error ? (
-          <div className="text-red-400 py-4 text-sm">{error}</div>
+          <div className="text-red-500 py-4 text-sm">{error}</div>
         ) : (
           navLinks.map((link) => {
-            // ✅ Highlight current route and nested ones (e.g. /applications/123)
             const active = pathname.startsWith(link.href);
 
             return (
@@ -76,18 +118,18 @@ export default function Sidebar({ collapsed }: { collapsed: boolean }) {
                 key={link.name}
                 href={link.href}
                 className={`flex items-center gap-3 w-full px-4 py-2.5 rounded-xl transition-all duration-300
-                  ${collapsed ? "justify-center" : "justify-start"} 
+                  ${collapsed ? "justify-center" : "justify-start"}
                   ${
                     active
-                      ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-[0_0_20px_rgba(147,51,234,0.4)]"
-                      : "hover:bg-white/10 text-gray-300 hover:text-white"
+                      ? "bg-gradient-to-r from-[#9f6eff] to-[#6e49ff] text-white shadow-[0_0_20px_rgba(147,51,234,0.3)]"
+                      : "text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover)] hover:text-[var(--sidebar-active-text)]"
                   }`}
               >
                 <span
                   className={`${
                     active
                       ? "text-white drop-shadow-[0_0_6px_rgba(147,51,234,0.8)]"
-                      : "text-gray-400"
+                      : "opacity-80"
                   }`}
                 >
                   {iconMap[link.icon]}
@@ -103,14 +145,14 @@ export default function Sidebar({ collapsed }: { collapsed: boolean }) {
         )}
       </nav>
 
-      {/* Divider line above Logout */}
-      <div className="w-[85%] border-t border-gray-800/80 mt-4 mb-3" />
-
-      {/* Logout Button */}
+      {/* Logout */}
       <button
-        className={`flex items-center gap-2 text-sm text-gray-400 hover:text-red-500 transition-all mb-4 w-full ${
+        className={`flex items-center gap-2 text-sm transition-all mb-6 w-full ${
           collapsed ? "justify-center" : "justify-start px-4"
         }`}
+        style={{
+          color: "var(--sidebar-text)",
+        }}
         onClick={() => {
           logout();
           router.push("/");

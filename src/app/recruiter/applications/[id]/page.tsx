@@ -32,7 +32,6 @@ export default function JobApplicantsPage() {
   const [selectedFilter, setSelectedFilter] = useState("All");
   const [sortOrder, setSortOrder] = useState("Newest First");
 
-  // ✅ Mock Data
   useEffect(() => {
     const mockJob: JobDetails = {
       title: id === "1" ? "Frontend Developer" : "UX Designer",
@@ -77,7 +76,6 @@ export default function JobApplicantsPage() {
     setApplicants(mockApplicants);
   }, [id]);
 
-  // ✅ Filter + Search + Sort logic
   const filteredApplicants = applicants
     .filter((a) =>
       selectedFilter === "All" ? true : a.status === selectedFilter
@@ -98,19 +96,28 @@ export default function JobApplicantsPage() {
   return (
     <RecruiterLayout>
       <div className="space-y-8">
-        {/* Job Header */}
+        {/* === Job Header === */}
         {job && (
-          <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 glass p-6 rounded-xl shadow-lg">
+          <div
+            className="flex flex-col md:flex-row justify-between md:items-center gap-4 
+                       p-6 rounded-xl shadow-lg border
+                       bg-white/80 dark:bg-white/5 
+                       border-gray-200 dark:border-white/10
+                       backdrop-blur-xl transition-all duration-300"
+          >
             <div>
-              <h1 className="text-3xl font-bold text-white">{job.title}</h1>
-              <p className="text-gray-400 text-sm mt-1">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                {job.title}
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
                 {job.location} • {job.jobType} • Posted on {job.postedOn}
               </p>
               <span
-                className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium ${
+                className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium 
+                ${
                   job.status === "Active"
-                    ? "bg-green-500/20 text-green-400"
-                    : "bg-red-500/20 text-red-400"
+                    ? "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400"
+                    : "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400"
                 }`}
               >
                 {job.status}
@@ -119,23 +126,21 @@ export default function JobApplicantsPage() {
 
             <div className="flex gap-3">
               <Link
-                href={`/recruiter/job-post/edit/${id}`}
-                className="px-4 py-2 bg-purple-600/20 text-purple-400 rounded-md text-sm hover:bg-purple-600/30 transition"
+                href={`/recruiter/requisitions/${id}/edit`}
+                className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white 
+                            rounded-md text-sm font-medium shadow-sm hover:shadow-[0_0_15px_rgba(124,58,237,0.4)] 
+                            transition-all duration-300"
               >
                 ✏️ Edit Job
               </Link>
-              <button className="px-4 py-2 bg-red-600/20 text-red-400 rounded-md text-sm hover:bg-red-600/30 transition">
-                🗑️ Close Job
-              </button>
             </div>
           </div>
         )}
 
-        {/* Search + Filter + Sort Section */}
+        {/* === Search + Filter + Sort === */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-2">
-          {/* Left side: Search & Filters */}
+          {/* Search + Filters */}
           <div className="flex flex-wrap items-center gap-3">
-            {/* Search Bar */}
             <div className="relative">
               <span className="absolute left-3 top-2.5 text-gray-400 text-sm">
                 🔍
@@ -145,21 +150,26 @@ export default function JobApplicantsPage() {
                 placeholder="Search applicants..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 pr-3 py-2 w-72 rounded-lg text-sm bg-white/10 text-white placeholder-gray-400 border border-gray-700 focus:ring-2 focus:ring-purple-500 outline-none"
+                className="pl-9 pr-3 py-2 w-72 rounded-lg text-sm
+                           bg-white text-gray-800 border border-gray-300 
+                           dark:bg-white/10 dark:text-white dark:border-gray-700
+                           placeholder-gray-500 dark:placeholder-gray-400
+                           focus:ring-2 focus:ring-purple-500 outline-none"
               />
             </div>
 
-            {/* Filter Chips */}
+            {/* Filter Buttons */}
             <div className="flex flex-wrap gap-2 mt-1 md:mt-0">
               {statusFilters.map((status) => (
                 <button
                   key={status}
                   onClick={() => setSelectedFilter(status)}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
-                    selectedFilter === status
-                      ? "bg-purple-600 text-white shadow-md"
-                      : "bg-white/10 text-gray-300 hover:bg-white/20"
-                  }`}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition
+                    ${
+                      selectedFilter === status
+                        ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20"
+                    }`}
                 >
                   {status}
                 </button>
@@ -167,15 +177,22 @@ export default function JobApplicantsPage() {
             </div>
           </div>
 
-          {/* Right side: Sort dropdown */}
+          {/* Sort Dropdown */}
           <div>
             <select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value)}
-              className="px-3 py-2 text-sm bg-white/10 border border-gray-700 text-white rounded-md focus:ring-2 focus:ring-purple-500 outline-none"
+              className="px-3 py-2 text-sm rounded-md border
+                         bg-white text-gray-800 border-gray-300
+                         dark:bg-white/10 dark:text-white dark:border-gray-700
+                         focus:ring-2 focus:ring-purple-500 outline-none"
             >
               {sortOptions.map((opt) => (
-                <option key={opt} value={opt} className="bg-gray-900">
+                <option
+                  key={opt}
+                  value={opt}
+                  className="bg-white dark:bg-gray-900"
+                >
                   {opt}
                 </option>
               ))}
@@ -183,44 +200,56 @@ export default function JobApplicantsPage() {
           </div>
         </div>
 
-        {/* Applicants Table */}
-        <div className="overflow-x-auto bg-white/5 border border-white/10 rounded-xl shadow-lg">
-          <table className="min-w-full divide-y divide-gray-700">
+        {/* === Applicants Table === */}
+        <div
+          className="overflow-x-auto rounded-xl border 
+                     bg-white/80 dark:bg-white/5 
+                     border-gray-200 dark:border-white/10 
+                     shadow-[0_4px_20px_rgba(0,0,0,0.05)] 
+                     dark:shadow-[0_0_25px_rgba(124,58,237,0.1)] 
+                     backdrop-blur-xl transition-all duration-300"
+        >
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
             <thead>
-              <tr className="text-left text-gray-300 text-sm bg-white/10">
-                <th className="px-6 py-3 font-medium">Candidate</th>
-                <th className="px-6 py-3 font-medium">Email</th>
-                <th className="px-6 py-3 font-medium">Applied On</th>
-                <th className="px-6 py-3 font-medium">Status</th>
-                <th className="px-6 py-3 font-medium text-center">Actions</th>
+              <tr className="text-left text-gray-700 dark:text-gray-300 text-sm bg-gray-50 dark:bg-white/10">
+                <th className="px-6 py-3 font-semibold">Candidate</th>
+                <th className="px-6 py-3 font-semibold">Email</th>
+                <th className="px-6 py-3 font-semibold">Applied On</th>
+                <th className="px-6 py-3 font-semibold">Status</th>
+                <th className="px-6 py-3 font-semibold text-center">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-800">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
               {filteredApplicants.length > 0 ? (
                 filteredApplicants.map((a) => (
                   <tr
                     key={a.id}
-                    className="hover:bg-purple-600/10 cursor-pointer transition"
+                    className="hover:bg-purple-50 dark:hover:bg-purple-600/10 cursor-pointer transition"
                     onClick={() =>
                       (window.location.href = `/recruiter/candidates/${a.id}`)
                     }
                   >
-                    <td className="px-6 py-4 text-white font-medium">
+                    <td className="px-6 py-4 text-gray-900 dark:text-white font-medium">
                       {a.name}
                     </td>
-                    <td className="px-6 py-4 text-gray-400">{a.email}</td>
-                    <td className="px-6 py-4 text-gray-400">{a.appliedOn}</td>
+                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                      {a.email}
+                    </td>
+                    <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                      {a.appliedOn}
+                    </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          a.status === "In Review"
-                            ? "bg-yellow-500/20 text-yellow-400"
-                            : a.status === "Interviewed"
-                            ? "bg-blue-500/20 text-blue-400"
-                            : a.status === "Hired"
-                            ? "bg-green-500/20 text-green-400"
-                            : "bg-red-500/20 text-red-400"
-                        }`}
+                        className={`px-3 py-1 rounded-full text-xs font-medium
+                          ${
+                            a.status === "In Review"
+                              ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-500/20 dark:text-yellow-400"
+                              : a.status === "Interviewed"
+                              ? "bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-400"
+                              : a.status === "Hired"
+                              ? "bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-400"
+                              : "bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-400"
+                          }`}
                       >
                         {a.status}
                       </span>
@@ -228,7 +257,7 @@ export default function JobApplicantsPage() {
                     <td className="px-6 py-4 text-center">
                       <Link
                         href={`/recruiter/candidates/${a.id}`}
-                        className="text-purple-400 text-sm hover:underline"
+                        className="text-purple-600 dark:text-purple-400 text-sm hover:underline"
                         onClick={(e) => e.stopPropagation()}
                       >
                         View
@@ -238,7 +267,10 @@ export default function JobApplicantsPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="text-center py-6 text-gray-400">
+                  <td
+                    colSpan={5}
+                    className="text-center py-6 text-gray-600 dark:text-gray-400"
+                  >
                     No applicants found.
                   </td>
                 </tr>

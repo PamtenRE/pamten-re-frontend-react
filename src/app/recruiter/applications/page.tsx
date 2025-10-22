@@ -23,7 +23,6 @@ export default function ApplicationsPage() {
   const [selectedFilter, setSelectedFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // ✅ Mock Data
   useEffect(() => {
     const mockJobs: Job[] = [
       {
@@ -85,75 +84,80 @@ export default function ApplicationsPage() {
         job.location.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-  // ✅ Stats
   const totalApplicants = jobs.reduce((sum, j) => sum + j.applicants, 0);
   const activeJobs = jobs.filter((j) => j.status === "Active").length;
   const closedJobs = jobs.filter((j) => j.status === "Closed").length;
 
   return (
     <RecruiterLayout>
-      <div className="p-6 space-y-10">
-        {/* ================= HEADER ================= */}
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl px-6 py-5 flex justify-between items-center shadow-lg">
-          <div>
-            <h1 className="text-3xl font-bold text-white">Job Listings</h1>
-            <p className="text-gray-400 text-sm mt-1">
+      <div className="p-6 space-y-10 transition-colors duration-300">
+        {/* ================= HEADER / BANNER ================= */}
+        <div
+          className="rounded-2xl px-6 py-5 flex justify-between items-center 
+          shadow-xl border border-[var(--border-soft)]
+          bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-500
+          dark:from-[#4c1d95] dark:via-[#6d28d9] dark:to-[#2563eb]
+          text-white transition-all duration-500"
+        >
+          <div className="relative z-10">
+            <h1 className="text-3xl font-bold">Job Listings</h1>
+            <p className="text-white/80 text-sm mt-1">
               Manage all your job postings and track applicant activity.
             </p>
           </div>
 
           <Link
             href="/recruiter/job-post"
-            className="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-lg hover:opacity-90 shadow-md transition-all"
+            className="relative z-10 px-4 py-2 rounded-lg bg-white text-purple-700 font-semibold shadow-md 
+              hover:scale-[1.03] hover:shadow-purple-300/40 transition-transform duration-200"
           >
             + Create Job
           </Link>
         </div>
 
-        {/* ✅ KPI Cards */}
+        {/* ================= KPI CARDS ================= */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-6">
           {[
             {
               label: "Active Jobs",
               value: activeJobs,
-              border: "from-green-400 via-emerald-300 to-yellow-300",
+              darkRim: "from-green-400 via-emerald-300 to-yellow-300",
+              lightRim: "from-green-200 via-lime-200 to-yellow-100",
             },
             {
               label: "Total Applicants",
               value: totalApplicants,
-              border: "from-blue-400 via-sky-400 to-cyan-300",
+              darkRim: "from-blue-400 via-sky-400 to-cyan-300",
+              lightRim: "from-blue-200 via-sky-200 to-cyan-100",
             },
             {
               label: "Closed Jobs",
               value: closedJobs,
-              border: "from-gray-400 via-slate-400 to-white/50",
+              darkRim: "from-gray-400 via-slate-400 to-white/50",
+              lightRim: "from-gray-200 via-slate-100 to-white",
             },
           ].map((card) => (
             <div
               key={card.label}
-              className="relative p-[2px] rounded-2xl 
-  bg-[linear-gradient(120deg,var(--tw-gradient-stops))] 
-  from-emerald-400 via-blue-400 to-purple-400
-  animate-[sheenMove_6s_ease-in-out_infinite]
-  bg-[length:200%_200%] overflow-hidden
-  shadow-[0_0_25px_rgba(0,0,0,0.6)]"
+              className="relative p-[2px] rounded-2xl overflow-hidden shadow-[0_0_25px_rgba(0,0,0,0.6)]
+                bg-[linear-gradient(120deg,var(--tw-gradient-stops))]
+                dark:from-emerald-400 dark:via-blue-400 dark:to-purple-400
+                from-gray-200 via-gray-100 to-white
+                bg-[length:200%_200%] animate-[sheenMove_6s_ease-in-out_infinite]"
             >
-              {/* ✨ Gradient border line */}
               <div
-                className={`absolute inset-0 rounded-2xl bg-gradient-to-tr ${card.border}
-        opacity-80`}
+                className={`absolute inset-0 rounded-2xl bg-gradient-to-tr dark:${card.darkRim} ${card.lightRim} opacity-80`}
               ></div>
-
-              {/* 🪟 Inner frosted glass layer */}
               <div
-                className="relative rounded-[14px] bg-[#0b0b0b]/70 backdrop-blur-2xl
-        flex flex-col items-center justify-center text-center py-10
-        border border-white/10 shadow-inner"
+                className="relative rounded-[14px] 
+                bg-white/90 dark:bg-[#0b0b0b]/70 
+                backdrop-blur-2xl flex flex-col items-center justify-center 
+                text-center py-10 border border-white/10 dark:border-white/10 shadow-inner"
               >
-                <h4 className="text-sm font-medium text-white/70 tracking-wide mb-1">
+                <h4 className="text-sm font-medium text-gray-700 dark:text-white/70 tracking-wide mb-1">
                   {card.label}
                 </h4>
-                <p className="text-5xl font-bold text-white drop-shadow-[0_2px_8px_rgba(255,255,255,0.3)]">
+                <p className="text-5xl font-bold text-gray-900 dark:text-white drop-shadow-[0_2px_8px_rgba(255,255,255,0.3)]">
                   {card.value}
                 </p>
               </div>
@@ -172,7 +176,11 @@ export default function ApplicationsPage() {
               placeholder="Search job title or location..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-3 py-2 w-full rounded-lg text-sm bg-white/10 text-white placeholder-gray-400 border border-gray-700 focus:ring-2 focus:ring-purple-500 outline-none"
+              className="pl-9 pr-3 py-2 w-full rounded-lg text-sm 
+              bg-white/90 dark:bg-white/10 
+              text-gray-900 dark:text-white placeholder-gray-400 
+              border border-gray-200 dark:border-gray-700 
+              focus:ring-2 focus:ring-purple-500 outline-none"
             />
           </div>
 
@@ -184,7 +192,7 @@ export default function ApplicationsPage() {
                 className={`px-4 py-1.5 rounded-full text-sm font-medium transition ${
                   selectedFilter === status
                     ? "bg-purple-600 text-white shadow-md"
-                    : "bg-white/10 text-gray-300 hover:bg-white/20"
+                    : "bg-white/80 dark:bg-white/10 text-gray-700 dark:text-gray-300 hover:bg-white/90 dark:hover:bg-white/20"
                 }`}
               >
                 {status}
@@ -194,10 +202,10 @@ export default function ApplicationsPage() {
         </div>
 
         {/* ================= JOBS TABLE ================= */}
-        <div className="overflow-x-auto bg-white/5 border border-white/10 rounded-xl shadow-lg">
-          <table className="min-w-full divide-y divide-gray-700">
+        <div className="overflow-x-auto bg-white/90 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl shadow-lg">
+          <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
             <thead>
-              <tr className="text-left text-gray-300 text-sm bg-white/10">
+              <tr className="text-left text-gray-700 dark:text-gray-300 text-sm bg-gray-100/80 dark:bg-white/10">
                 <th className="px-6 py-3 font-medium">Job Title</th>
                 <th className="px-6 py-3 font-medium">Status</th>
                 <th className="px-6 py-3 font-medium">Location</th>
@@ -207,52 +215,54 @@ export default function ApplicationsPage() {
                 <th className="px-6 py-3 font-medium text-center">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-800">
+            <tbody className="divide-y divide-gray-300 dark:divide-gray-800">
               {filteredJobs.length > 0 ? (
                 filteredJobs.map((job) => (
                   <tr
                     key={job.id}
-                    className="hover:bg-white/10 transition cursor-pointer"
+                    className="group cursor-pointer transition-all duration-300 hover:bg-purple-50 dark:hover:bg-white/10 hover:shadow-[0_4px_15px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_4px_20px_rgba(255,255,255,0.05)] hover:-translate-y-[2px] rounded-lg"
+                    onClick={() =>
+                      (window.location.href = `/recruiter/applications/${job.id}`)
+                    }
                   >
-                    <td
-                      onClick={() =>
-                        (window.location.href = `/recruiter/applications/${job.id}`)
-                      }
-                      className="px-6 py-4 text-white font-semibold hover:text-purple-400 transition"
-                    >
+                    <td className="px-6 py-4 font-semibold text-gray-900 dark:text-white group-hover:text-purple-700 dark:group-hover:text-purple-400 transition-colors">
                       {job.title}
                     </td>
                     <td className="px-6 py-4">
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-medium ${
                           job.status === "Active"
-                            ? "bg-green-500/20 text-green-400"
+                            ? "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400"
                             : job.status === "Closed"
-                            ? "bg-red-500/20 text-red-400"
-                            : "bg-yellow-500/20 text-yellow-400"
+                            ? "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400"
+                            : "bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-400"
                         }`}
                       >
                         {job.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-gray-300">{job.location}</td>
-                    <td className="px-6 py-4 text-gray-300">
+                    <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
+                      {job.location}
+                    </td>
+                    <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
                       {job.applicants}
                     </td>
-                    <td className="px-6 py-4 text-gray-300">{job.jobType}</td>
-                    <td className="px-6 py-4 text-gray-400 text-sm">
+                    <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
+                      {job.jobType}
+                    </td>
+                    <td className="px-6 py-4 text-gray-500 dark:text-gray-400 text-sm">
                       {job.postedOn}
                     </td>
                     <td className="px-6 py-4 text-center space-x-2">
                       <Link
                         href={`/recruiter/applications/${job.id}`}
-                        className="px-3 py-1 bg-blue-600/20 text-blue-400 rounded-md text-xs hover:bg-blue-600/30 transition"
+                        className="px-3 py-1 bg-blue-100 text-blue-700 dark:bg-blue-600/20 dark:text-blue-400 rounded-md text-xs hover:bg-blue-200 dark:hover:bg-blue-600/30 transition"
                       >
                         View Applicants
                       </Link>
                       <Link
                         href={`/recruiter/job-post/edit/${job.id}`}
-                        className="px-3 py-1 bg-purple-600/20 text-purple-400 rounded-md text-xs hover:bg-purple-600/30 transition"
+                        className="px-3 py-1 bg-purple-100 text-purple-700 dark:bg-purple-600/20 dark:text-purple-400 rounded-md text-xs hover:bg-purple-200 dark:hover:bg-purple-600/30 transition"
                       >
                         Edit
                       </Link>
@@ -261,7 +271,10 @@ export default function ApplicationsPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="text-center py-6 text-gray-400">
+                  <td
+                    colSpan={7}
+                    className="text-center py-6 text-gray-500 dark:text-gray-400"
+                  >
                     No job listings found.
                   </td>
                 </tr>

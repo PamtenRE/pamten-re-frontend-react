@@ -39,14 +39,12 @@ export default function EditRequisitionPage() {
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<Requisition["status"]>("draft");
 
-  // ✅ Fetch existing job data
   useEffect(() => {
     const fetchJob = async () => {
       try {
         setLoading(true);
         let found: Requisition | undefined;
 
-        // Try backend first
         if (user && token) {
           try {
             const data: Requisition[] = await apiFetch(
@@ -66,7 +64,6 @@ export default function EditRequisitionPage() {
           }
         }
 
-        // Fallback to local storage
         const localJobs: Requisition[] = JSON.parse(
           localStorage.getItem("localRequisitions") || "[]"
         );
@@ -90,7 +87,6 @@ export default function EditRequisitionPage() {
     fetchJob();
   }, [id, user, token]);
 
-  // ✅ Handle updates
   const handleUpdate = async (updatedData: Partial<Requisition>) => {
     if (!req) return;
     try {
@@ -123,7 +119,6 @@ export default function EditRequisitionPage() {
     }
   };
 
-  // 🗑️ Handle Delete
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to delete this requisition?")) return;
     try {
@@ -159,7 +154,7 @@ export default function EditRequisitionPage() {
   if (error || !req) {
     return (
       <RecruiterLayout>
-        <div className="flex justify-center items-center h-[70vh] text-gray-400">
+        <div className="flex justify-center items-center h-[70vh] text-gray-500 dark:text-gray-400">
           {error || "Requisition not found."}
         </div>
       </RecruiterLayout>
@@ -168,46 +163,59 @@ export default function EditRequisitionPage() {
 
   return (
     <RecruiterLayout>
-      <div className="p-6 md:p-10 max-w-6xl mx-auto text-white">
-        {/* === HEADER SECTION === */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold">
-              Edit Requisition — {req.title}
+      <div
+        className="min-h-screen px-6 md:px-10 py-8 transition-colors duration-700
+        bg-gradient-to-br from-indigo-50 via-white to-purple-50 
+        dark:from-[#0a0118] dark:via-[#12072c] dark:to-[#0a0a23]"
+      >
+        <div className="max-w-6xl mx-auto">
+          {/* === HEADER === */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-500 to-blue-500 bg-clip-text text-transparent">
+                Edit Requisition — {req.title}
+              </h1>
               {req.source === "local" && (
-                <span className="ml-2 text-xs text-gray-400 italic">
+                <span className="ml-1 text-xs text-gray-500 italic">
                   (Local Draft)
                 </span>
               )}
-            </h1>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <select
+                value={status}
+                onChange={(e) =>
+                  setStatus(e.target.value as Requisition["status"])
+                }
+                className="bg-white border border-gray-300 dark:bg-white/10 dark:border-white/10 text-gray-700 dark:text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-purple-500 transition"
+              >
+                <option value="draft">Draft</option>
+                <option value="Open">Open</option>
+                <option value="In Review">In Review</option>
+                <option value="Closed">Closed</option>
+              </select>
+
+              <button
+                onClick={handleDelete}
+                className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
+              >
+                <Trash2 size={16} /> Delete
+              </button>
+            </div>
           </div>
 
-          {/* Status + Delete */}
-          <div className="flex items-center gap-3">
-            <select
-              value={status}
-              onChange={(e) =>
-                setStatus(e.target.value as Requisition["status"])
-              }
-              className="bg-white/10 border border-white/10 text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-purple-500"
-            >
-              <option value="draft">Draft</option>
-              <option value="Open">Open</option>
-              <option value="In Review">In Review</option>
-              <option value="Closed">Closed</option>
-            </select>
-
-            <button
-              onClick={handleDelete}
-              className="flex items-center gap-2 bg-red-600/80 hover:bg-red-600 px-4 py-2 rounded-lg text-sm font-medium transition"
-            >
-              <Trash2 size={16} /> Delete
-            </button>
+          {/* === FORM === */}
+          <div
+            className="relative p-8 rounded-3xl border border-gray-200 dark:border-white/10
+            bg-gradient-to-br from-white via-white to-gray-50
+            dark:from-[#0f0f1a]/60 dark:via-[#101020]/60 dark:to-[#0a0a18]/60
+            shadow-[0_8px_32px_rgba(0,0,0,0.1)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.2)]
+            backdrop-blur-2xl transition-all duration-500"
+          >
+            <EditJobForm existingData={req} onSubmit={handleUpdate} />
           </div>
         </div>
-
-        {/* === EDIT FORM === */}
-        <EditJobForm existingData={req} onSubmit={handleUpdate} />
       </div>
     </RecruiterLayout>
   );

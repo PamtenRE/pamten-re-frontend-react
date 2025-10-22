@@ -34,8 +34,7 @@ export default function RichTextEditor({
     /** ✅ Replace Quill’s built-in paste handler */
     const Clipboard = quill.getModule("clipboard");
 
-    Clipboard.addMatcher(Node.ELEMENT_NODE, (node, delta) => {
-      // Instead of returning formatted delta, return plain text only
+    Clipboard.addMatcher(Node.ELEMENT_NODE, (node) => {
       const text = node.textContent || "";
       return quill.clipboard.convert({ text });
     });
