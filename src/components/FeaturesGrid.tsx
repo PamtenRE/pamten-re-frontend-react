@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { motion } from "framer-motion";
+import { useTestimonials } from "@/hooks/useQueries";
 
 interface Testimonial {
   quote: string;
@@ -11,25 +11,10 @@ interface Testimonial {
 }
 
 export default function FeaturesGrid() {
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetch('/api/testimonials')
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to fetch testimonials');
-        return res.json();
-      })
-      .then((data) => {
-        setTestimonials(data.testimonials || []);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, []);
+  const { data, isLoading: loading, error } = useTestimonials();
+  const testimonials = data?.testimonials || [];
+  const errorMessage =
+    error instanceof Error ? error.message : "An error occurred";
 
   return (
     <section className="py-20 md:py-28 bg-transparent">
@@ -45,31 +30,39 @@ export default function FeaturesGrid() {
         </motion.h2>
 
         {loading ? (
-          <div className="text-center text-white py-10">Loading testimonials...</div>
+          <div className="text-center text-white py-10">
+            Loading testimonials...
+          </div>
         ) : error ? (
-          <div className="text-center text-red-400 py-10">{error}</div>
+          <div className="text-center text-red-400 py-10">{errorMessage}</div>
         ) : testimonials.length === 0 ? (
-          <div className="text-center text-white py-10">No testimonials found.</div>
+          <div className="text-center text-white py-10">
+            No testimonials found.
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((feature, i) => (
+            {testimonials.map((testimonial: Testimonial, index: number) => (
               <motion.div
-                key={i}
+                key={index}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: i * 0.2 }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
                 whileHover={{ scale: 1.05 }}
                 className="glass p-6 md:p-8 rounded-2xl text-left shadow-md hover:shadow-purple-500/30 transition-all duration-300"
               >
-                <p className="italic text-white mb-6">&quot;{feature.quote}&quot;</p>
+                <p className="italic text-white mb-6">
+                  &quot;{testimonial.quote}&quot;
+                </p>
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 flex items-center justify-center text-2xl rounded-full bg-white/20 border border-white/30">
-                    {feature.emoji}
+                    {testimonial.emoji}
                   </div>
                   <div>
-                    <p className="font-semibold text-white">{feature.name}</p>
-                    <p className="text-sm text-white/70">{feature.title}</p>
+                    <p className="font-semibold text-white">
+                      {testimonial.name}
+                    </p>
+                    <p className="text-sm text-white/70">{testimonial.title}</p>
                   </div>
                 </div>
               </motion.div>
