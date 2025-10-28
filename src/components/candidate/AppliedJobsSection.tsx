@@ -43,6 +43,16 @@ export default function AppliedJobsSection() {
   useEffect(() => {
     const fetchRecentApplications = async () => {
       if (!isAuthenticated || !user?.userId || !token) return;
+      console.log("🧭 AUTH DEBUG -----------------------------");
+      console.log("User from AuthContext:", user);
+      console.log("User ID being sent:", user?.userId);
+      console.log("Auth Token (truncated):", token?.slice(0, 25) + "...");
+      console.log(
+        "API URL:",
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/applications/v1/candidate/${user.userId}`
+      );
+      console.log("------------------------------------------------");
+
       setLoading(true);
       setError(null);
       try {

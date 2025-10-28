@@ -146,7 +146,9 @@ export default function NotificationsPage() {
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400 mt-1">
                   {unreadCount > 0
-                    ? `You have ${unreadCount} unread notification${unreadCount > 1 ? "s" : ""}`
+                    ? `You have ${unreadCount} unread notification${
+                        unreadCount > 1 ? "s" : ""
+                      }`
                     : "All caught up!"}
                 </p>
               </div>
@@ -190,10 +192,10 @@ export default function NotificationsPage() {
                   key={notification.id}
                   className={`relative glass rounded-xl p-6 border-l-4 transition-all duration-300 ${getTypeStyles(
                     notification.type
-                  )} ${
-                    !notification.read ? "shadow-lg" : "opacity-75"
-                  }`}
-                  onClick={() => !notification.read && markAsRead(notification.id)}
+                  )} ${!notification.read ? "shadow-lg" : "opacity-75"}`}
+                  onClick={() =>
+                    !notification.read && markAsRead(notification.id)
+                  }
                 >
                   <div className="flex items-start gap-4">
                     {/* Icon */}

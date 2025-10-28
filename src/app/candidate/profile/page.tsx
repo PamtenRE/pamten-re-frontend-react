@@ -18,13 +18,11 @@ import {
   calculateProfileProgress,
 } from "@/utils/profileHelpers";
 import { profileAPI } from "@/lib/api/profile";
-import { useToast } from "@/components/ui/Toast";
 
 export default function CandidateProfilePage() {
   const { user, isAuthenticated, isAuthReady, updateProfileProgress, token } =
     useAuth();
   const router = useRouter();
-  const { addToast } = useToast();
 
   const [activeStep, setActiveStep] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,7 +30,7 @@ export default function CandidateProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [tier, setTier] = useState<string>("Bronze");
 
-  const steps = ["Basic Info", "Experience", "Skills", "ATS Resume", "Review"];
+  const steps = ["Basic Info", "Experience", "Skills", "Resume", "Review"];
 
   const [form, setForm] = useState<ProfileFormData>({
     firstName: "",
@@ -63,7 +61,7 @@ export default function CandidateProfilePage() {
     // Add a small delay to ensure localStorage is fully processed
     const timeout = setTimeout(() => {
       if (!isAuthenticated || !user) {
-        router.push("/");
+        router.push("/login");
         return;
       }
       if (user.role?.toLowerCase() !== "candidate") {
@@ -90,10 +88,16 @@ export default function CandidateProfilePage() {
             ...backendData,
             email: user.email || backendData.email || "",
           }));
+          console.log("✅ Loaded profile from backend");
         } else {
           throw new Error("No backend data");
         }
-      } catch {
+      } catch (error) {
+        console.error(
+          "Failed to load from backend, using localStorage:",
+          error
+        );
+
         // Fallback to localStorage
         const saved = loadProfileFromLocalStorage();
         if (saved) {
@@ -102,6 +106,7 @@ export default function CandidateProfilePage() {
             ...saved,
             email: user.email || saved.email,
           }));
+          console.log("✅ Restored profile from localStorage");
         } else {
           const nameParts = user.fullName?.split(" ") || [];
           setForm((prev) => ({
@@ -127,6 +132,7 @@ export default function CandidateProfilePage() {
       saveProfileToLocalStorage(form);
       setLastSaved(new Date());
       setIsSaving(false);
+      console.log("💾 Profile autosaved");
     }, 1200);
     return () => clearTimeout(timeout);
   }, [form, user, isLoading]);
@@ -140,6 +146,7 @@ export default function CandidateProfilePage() {
 
   // 🧮 PROGRESS & TIER + SYNC TO CONTEXT
   const currentProgress = calculateProfileProgress(form);
+  // 🧮 PROGRESS & TIER + SYNC TO CONTEXT (fixed version)
   useEffect(() => {
     let newTier = "Bronze";
     if (currentProgress >= 25 && currentProgress < 50) newTier = "Silver";
@@ -148,21 +155,19 @@ export default function CandidateProfilePage() {
       newTier = "Platinum";
     else if (currentProgress >= 100) newTier = "Diamond";
 
-    setTier(newTier);
-    localStorage.setItem("userTier", newTier);
-    updateProfileProgress(currentProgress); // ✅ sync with AuthContext
+    // ✅ Only update state if the tier actually changed
+    setTier((prevTier) => {
+      if (prevTier !== newTier) {
+        localStorage.setItem("userTier", newTier);
+        return newTier;
+      }
+      return prevTier;
+    });
 
-    // Show special toast when profile reaches 100%
-    if (currentProgress >= 100) {
-      addToast({
-        type: "success",
-        title: "🎉 Profile Complete!",
-        message:
-          "Congratulations! Your profile is now 100% complete and ready for recruiters to see.",
-        duration: 8000,
-      });
-    }
-  }, [currentProgress, updateProfileProgress, addToast]);
+    // ✅ Only sync to context if progress actually changed
+    updateProfileProgress?.(currentProgress);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentProgress]);
 
   // 🧱 FORM UPDATERS
   const updateForm = <K extends keyof ProfileFormData>(
@@ -193,11 +198,7 @@ export default function CandidateProfilePage() {
   // 🎯 FINAL SUBMIT
   const handleSubmitProfile = async () => {
     if (!token) {
-      addToast({
-        type: "warning",
-        title: "Login Required",
-        message: "Please log in to save your profile",
-      });
+      alert("Please log in to save your profile");
       return;
     }
 
@@ -208,20 +209,14 @@ export default function CandidateProfilePage() {
       // Also save to localStorage as backup
       saveProfileToLocalStorage(form);
 
-      addToast({
-        type: "success",
-        title: "Profile Submitted Successfully!",
-        message: "Your profile has been saved to the server",
-      });
+      alert("🎉 Profile Submitted Successfully!");
       updateProfileProgress(currentProgress); // ✅ sync final progress
-    } catch {
+    } catch (error) {
+      console.error("Failed to save profile to backend:", error);
+
       // Fallback to localStorage only
       saveProfileToLocalStorage(form);
-      addToast({
-        type: "info",
-        title: "Profile Saved Locally",
-        message: "Backend unavailable - profile saved locally",
-      });
+      alert("🎉 Profile Saved Locally! (Backend unavailable)");
       updateProfileProgress(currentProgress);
     }
   };

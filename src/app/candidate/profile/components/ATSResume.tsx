@@ -19,10 +19,11 @@ export default function ATSResumeStep({
       {/* Header */}
       <div>
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-          Upload Resume
+          Resume Upload
         </h2>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Upload your resume to complete your profile.
+          Upload your resume to complete your profile and improve your job
+          matching.
         </p>
       </div>
 

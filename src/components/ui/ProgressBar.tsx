@@ -18,24 +18,35 @@ export default function ProgressBar({
 
   return (
     <div className={`w-full ${className}`}>
-      <div className="relative w-full h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+      <div className="relative w-full h-8 bg-gray-100/50 dark:bg-gray-800/50 rounded-2xl overflow-hidden border border-gray-200/30 dark:border-gray-700/30 backdrop-blur-sm">
         <motion.div
-          className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-violet-600 rounded-full"
+          className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-2xl"
           initial={{ width: 0 }}
           animate={{ width: `${normalizedProgress}%` }}
-          transition={{ duration: 1, ease: "easeOut" }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
           style={{
-            boxShadow:
-              "0 2px 4px rgba(59, 130, 246, 0.3), 0 0 8px rgba(139, 92, 246, 0.2)",
+            background: `linear-gradient(90deg, 
+              #3b82f6 0%, 
+              #6366f1 25%, 
+              #8b5cf6 50%, 
+              #a855f7 75%, 
+              #c084fc 100%)`,
+            boxShadow: `
+              inset 0 1px 0 rgba(255,255,255,0.2),
+              inset 0 -1px 0 rgba(0,0,0,0.1),
+              0 4px 12px rgba(59, 130, 246, 0.3)
+            `,
           }}
         />
         {showPercentage && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-xs font-semibold text-gray-700 dark:text-gray-200 drop-shadow">
+            <span className="text-sm font-bold text-white drop-shadow-lg">
               {normalizedProgress}%
             </span>
           </div>
         )}
+        {/* Subtle shine effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 animate-pulse" />
       </div>
     </div>
   );

@@ -15,6 +15,7 @@ export const CACHE_CONFIG = {
 // Route Configuration
 export const ROUTES = {
   HOME: "/",
+  LOGIN: "/login",
   DASHBOARD: "/dashboard",
   PROFILE: "/profile",
   RECRUITER: {
@@ -23,7 +24,7 @@ export const ROUTES = {
     REQUISITIONS: "/recruiter/requisitions",
   },
   CANDIDATE: {
-    HOME: "/candidate/home",
+    DASHBOARD: "/candidate/home",
     PROFILE: "/candidate/profile",
   },
 } as const;

@@ -183,33 +183,17 @@ export default function BasicInfoStep({
         />
       </div>
 
-      {/* File Uploads */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        {/* Resume */}
-        <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Resume
-          </label>
-          <input
-            type="file"
-            accept=".pdf,.doc,.docx"
-            onChange={(e) => updateForm("resumeFile", e.target.files?.[0])}
-            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-3 text-gray-900 dark:text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 file:mr-4 file:rounded-md file:border-0 file:bg-blue-600 file:px-3 file:py-2 file:text-white hover:file:bg-blue-700"
-          />
-        </div>
-
-        {/* Pitch Video */}
-        <div>
-          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-            2 min Pitch Video
-          </label>
-          <input
-            type="file"
-            accept="video/*"
-            onChange={(e) => updateForm("pitchVideoFile", e.target.files?.[0])}
-            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-3 text-gray-900 dark:text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 file:mr-4 file:rounded-md file:border-0 file:bg-blue-600 file:px-3 file:py-2 file:text-white hover:file:bg-blue-700"
-          />
-        </div>
+      {/* Pitch Video Upload */}
+      <div>
+        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          2 min Pitch Video
+        </label>
+        <input
+          type="file"
+          accept="video/*"
+          onChange={(e) => updateForm("pitchVideoFile", e.target.files?.[0])}
+          className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-3 text-gray-900 dark:text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 file:mr-4 file:rounded-md file:border-0 file:bg-blue-600 file:px-3 file:py-2 file:text-white hover:file:bg-blue-700"
+        />
       </div>
     </div>
   );

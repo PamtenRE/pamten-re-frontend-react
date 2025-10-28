@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -28,14 +28,10 @@ export default function ProfileCompletionBar({
       </div>
 
       {/* Progress Bar */}
-      <div className="w-full h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+      <div className="w-full h-5 bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-blue-500 to-violet-600 rounded-full transition-all duration-500 ease-in-out"
-          style={{
-            width: `${currentProgress}%`,
-            boxShadow:
-              "0 2px 4px rgba(59, 130, 246, 0.3), 0 0 8px rgba(139, 92, 246, 0.2)",
-          }}
+          className="h-full bg-gradient-to-r from-green-500 to-green-600 rounded-lg transition-all duration-500 ease-in-out"
+          style={{ width: `${currentProgress}%` }}
         />
       </div>
 

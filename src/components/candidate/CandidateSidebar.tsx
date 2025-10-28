@@ -23,6 +23,7 @@ import {
 
 export default function CandidateSidebar() {
   const pathname = usePathname();
+  //console.log("Current pathname:", pathname);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Navigation items matching wireframe

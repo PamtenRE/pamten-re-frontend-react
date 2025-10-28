@@ -1,25 +1,26 @@
-'use client';
+"use client";
 
-import React, { Suspense, useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
+import React, { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 function LoginInner() {
   const { login, isAuthenticated, user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [userId, setUserId] = useState('');
-  const [password, setPassword] = useState('');
+  const [userId, setUserId] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const registered = searchParams.get('registered');
+  const registered = searchParams.get("registered");
 
   useEffect(() => {
     if (!isAuthenticated || !user) return;
     const role = user.role.toLowerCase();
-    const target = role === 'recruiter' ? '/recruiter/dashboard' : '/candidate/dashboard';
+    const target =
+      role === "recruiter" ? "/recruiter/dashboard" : "/candidate/home";
     router.replace(target);
   }, [isAuthenticated, user, router]);
 
@@ -31,7 +32,7 @@ function LoginInner() {
       await login(userId, password);
       // Redirect handled by AuthContext effect
     } catch (err: any) {
-      setError(err.message || 'Login failed');
+      setError(err.message || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -42,7 +43,9 @@ function LoginInner() {
       <div className="w-full max-w-md glass rounded-xl p-8 bg-white dark:bg-zinc-900 text-gray-900 dark:text-white">
         <h1 className="text-2xl font-bold mb-2">Login</h1>
         {registered && (
-          <div className="mb-4 text-green-600 text-sm">Registration successful. Please sign in.</div>
+          <div className="mb-4 text-green-600 text-sm">
+            Registration successful. Please sign in.
+          </div>
         )}
         {error && <div className="mb-4 text-red-500 text-sm">{error}</div>}
 
@@ -66,14 +69,18 @@ function LoginInner() {
               required
             />
           </div>
-          <button type="submit" disabled={loading} className="w-full bg-purple-600 text-white py-2 rounded-lg">
-            {loading ? 'Signing in...' : 'Sign In'}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-purple-600 text-white py-2 rounded-lg"
+          >
+            {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
       </div>
     </div>
   );
-} 
+}
 
 export default function LoginPage() {
   return (

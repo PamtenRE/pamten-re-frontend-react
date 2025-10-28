@@ -9,8 +9,6 @@ import CandidateSidebar from "@/components/candidate/CandidateSidebar";
 import JobCard from "@/components/candidate/JobCard";
 import AppliedJobsSection from "@/components/candidate/AppliedJobsSection";
 import Link from "next/link";
-import { JobListing } from "@/lib/api/jobs";
-import { useToast } from "@/components/ui/Toast";
 
 export default function CandidateDashboardPage() {
   const {
@@ -22,17 +20,12 @@ export default function CandidateDashboardPage() {
     profileProgress,
   } = useAuth();
   const router = useRouter();
-  const { addToast } = useToast();
-  const [jobs, setJobs] = useState<JobListing[]>([]);
+  const [jobs, setJobs] = useState<any[]>([]);
   const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
   const [appliedJobs, setAppliedJobs] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showProgressCard, setShowProgressCard] = useState(true);
-  const [userLocation] = useState<string>(
-    "Sausalito, California, United States"
-  );
-  const [newJobMatches, setNewJobMatches] = useState<number>(5);
 
   // Load saved and applied jobs from localStorage on mount
   useEffect(() => {
@@ -76,12 +69,8 @@ export default function CandidateDashboardPage() {
       try {
         const data = await apiFetch("/api/jobs/v1/all", {}, token || undefined);
         setJobs(data.jobs || []);
-        // Calculate new job matches based on available jobs
-        setNewJobMatches(Math.min(data.jobs?.length || 0, 10));
       } catch (err: any) {
         setError(err.message || "Failed to fetch jobs");
-        // Set fallback job matches
-        setNewJobMatches(0);
       } finally {
         setLoading(false);
       }
@@ -112,14 +101,9 @@ export default function CandidateDashboardPage() {
         `applied_jobs_${user.userId}`,
         JSON.stringify(Array.from(updatedAppliedJobs))
       );
-      // Show success feedback
-    } catch (err: any) {
-      // Show error feedback to user
-      addToast({
-        type: "error",
-        title: "Application Failed",
-        message: `Failed to apply to job: ${err.message || "Unknown error"}`,
-      });
+      // Optionally: refresh or show a toast; keeping minimal per request
+    } catch (err) {
+      // Optionally: handle error/toast
     }
   };
 
@@ -149,12 +133,7 @@ export default function CandidateDashboardPage() {
   if (!isAuthReady || isLoading) {
     return (
       <div className="min-h-screen bg-white dark:bg-zinc-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">
-            Loading your dashboard...
-          </p>
-        </div>
+        <div className="text-gray-600 dark:text-gray-300">Loading...</div>
       </div>
     );
   }
@@ -172,25 +151,24 @@ export default function CandidateDashboardPage() {
           {/* Welcome Section */}
           <div>
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
-              Welcome Back, {user.email.split("@")[0] || "Candidate"}! 👋
+              Welcome Back, {user.email.split("@")[0] || "Candidate"} !! 👋
             </h1>
             <div className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-              <span>{userLocation}</span>
+              <span>
+                {user.location || "Sausalito, California, United States"}
+              </span>
               <span className="mx-2">•</span>
 
               <Link
                 href="/candidate/profile"
-                className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline transition-colors"
+                className="text-blue-600 dark:text-blue-400 hover:underline"
               >
                 Contact Info
               </Link>
             </div>
             <p className="text-gray-700 dark:text-gray-300">
-              Ready to find your next opportunity? You have{" "}
-              <span className="font-semibold text-blue-600 dark:text-blue-400">
-                {newJobMatches}
-              </span>{" "}
-              new job matches today
+              Ready To find Your next Opportunity ? You have{" "}
+              <span className="font-semibold">5</span> new job matches today
             </p>
           </div>
 
@@ -212,7 +190,7 @@ export default function CandidateDashboardPage() {
             </div>
             <button
               onClick={() => router.push("/candidate/jobs")}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
             >
               View All Jobs
             </button>
@@ -236,12 +214,7 @@ export default function CandidateDashboardPage() {
                   <JobCard
                     key={job.jobId}
                     job={{
-                      jobId: job.jobId.toString(),
-                      title: job.title,
-                      organizationName: job.organizationName,
-                      city: job.city,
-                      state: job.state,
-                      postedDate: job.postedDate,
+                      ...job,
                       salary: undefined,
                       employmentType: job.jobType || "Not specified",
                       tags: job.requiredSkills
@@ -249,12 +222,11 @@ export default function CandidateDashboardPage() {
                             .split(",")
                             .map((skill: string) => skill.trim())
                         : [],
-                      jobType: job.jobType,
                     }}
                     onApply={(jobId) => handleApplyToJob(jobId)}
                     onSave={(jobId) => handleSaveJob(jobId)}
-                    isSaved={savedJobs.has(job.jobId.toString())}
-                    isApplied={appliedJobs.has(job.jobId.toString())}
+                    isSaved={savedJobs.has(job.jobId)}
+                    isApplied={appliedJobs.has(job.jobId)}
                   />
                 ))}
               </div>

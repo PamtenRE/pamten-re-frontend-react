@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import CandidateSidebar from "@/components/candidate/CandidateSidebar";
-import { candidateAPI } from "@/lib/api/services";
+import { candidateAPI } from "@/lib/api/candidate";
 import {
   LineChart,
   Line,
@@ -13,9 +13,9 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  Legend,
   ResponsiveContainer,
 } from "recharts";
-import { useToast } from "@/components/ui/Toast";
 
 const statusConfig = {
   interview_scheduled: {
@@ -133,7 +133,6 @@ const parseErrorMessage = (
 export default function ApplicationsPage() {
   const router = useRouter();
   const { user, token, isAuthenticated, isAuthReady, isLoading } = useAuth();
-  const { addToast } = useToast();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState("all");
   const [sortBy, setSortBy] = useState("recent");
@@ -328,13 +327,6 @@ export default function ApplicationsPage() {
             </p>
           </div>
 
-          <button
-            onClick={() => router.push("/candidate/jobs")}
-            className="mb-6 px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-900 dark:text-white"
-          >
-            Browse New Jobs
-          </button>
-
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Side - Applications List (2/3) */}
             <div className="lg:col-span-2">
@@ -489,13 +481,13 @@ export default function ApplicationsPage() {
                 {!loading &&
                   !error &&
                   filteredJobs.map((job) => {
-                    const isExpanded = expandedId === job.id;
+                    const isExpanded = expandedId === job.applicationId;
                     const statusInfo =
                       statusConfig[job.status as keyof typeof statusConfig];
 
                     return (
                       <div
-                        key={job.id}
+                        key={job.applicationId}
                         className="glass rounded-xl overflow-hidden transition-all duration-300"
                       >
                         <div className="p-6 flex flex-wrap items-center gap-4">
@@ -515,7 +507,7 @@ export default function ApplicationsPage() {
                           </div>
                           <div className="flex gap-2 flex-shrink-0">
                             <button
-                              onClick={() => toggleExpand(job.id)}
+                              onClick={() => toggleExpand(job.applicationId)}
                               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors text-sm"
                             >
                               View Application
@@ -525,20 +517,19 @@ export default function ApplicationsPage() {
                               onClick={async () => {
                                 try {
                                   await candidateAPI.withdrawApplication(
-                                    job.id,
+                                    job.applicationId,
                                     user?.userId || "",
                                     token || ""
                                   );
                                   setApplications((prev) =>
-                                    prev.filter((a) => a.id !== job.id)
+                                    prev.filter(
+                                      (a) =>
+                                        a.applicationId !== job.applicationId
+                                    )
                                   );
                                 } catch (e: any) {
                                   const errorMessage = parseErrorMessage(e);
-                                  addToast({
-                                    type: "error",
-                                    title: "Error",
-                                    message: errorMessage.message,
-                                  });
+                                  alert(errorMessage.message);
                                 }
                               }}
                             >

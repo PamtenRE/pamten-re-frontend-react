@@ -67,7 +67,7 @@ export function isSkillsComplete(data: ProfileFormData): boolean {
 }
 
 /**
- * Calculate if Resume section is complete
+ * Calculate if ATS Resume section is complete
  */
 export function isATSResumeComplete(data: ProfileFormData): boolean {
   return !!data.resumeFile;
@@ -114,7 +114,8 @@ export function loadProfileFromLocalStorage(): ProfileFormData | null {
   
   try {
     return JSON.parse(saved);
-  } catch {
+  } catch (error) {
+    console.error('Error loading profile from localStorage:', error);
     return null;
   }
 }

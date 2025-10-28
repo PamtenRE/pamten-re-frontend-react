@@ -10,14 +10,15 @@ interface User {
   profileCompleted: boolean;
   fullName?: string;
   token?: string;
+  profileProgress?: number;
 }
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
-  isAuthReady: boolean; // ✅ NEW
-  isLoading: boolean; // ✅ NEW
+  isAuthReady: boolean;
+  isLoading: boolean;
   profileProgress: number;
   login: (userId: string, password: string) => Promise<void>;
   register: (formData: any) => Promise<void>;
@@ -33,33 +34,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [profileProgress, setProfileProgress] = useState(0);
-  const [isAuthReady, setIsAuthReady] = useState(false); // ✅ NEW
-  const [isLoading, setIsLoading] = useState(true); // ✅ NEW
+  const [isAuthReady, setIsAuthReady] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  // ✅ Load user & token on mount
+  // ✅ Load saved session on mount
   useEffect(() => {
-    const initializeAuth = async () => {
-      const storedToken = localStorage.getItem("token");
-      const storedUser = localStorage.getItem("user");
-      const savedProgress = localStorage.getItem("profileProgress");
+    const initializeAuth = () => {
+      try {
+        const storedToken = localStorage.getItem("token");
+        const storedUser = localStorage.getItem("user");
+        const savedProgress = localStorage.getItem("profileProgress");
 
-      if (storedToken && storedUser) {
-        setToken(storedToken);
-        setUser(JSON.parse(storedUser));
-        setIsAuthenticated(true);
-      }
-      if (savedProgress) {
-        setProfileProgress(parseInt(savedProgress));
-      }
+        if (storedToken && storedUser) {
+          setToken(storedToken);
+          setUser(JSON.parse(storedUser));
+          setIsAuthenticated(true);
+        }
 
-      setIsAuthReady(true); // ✅ Mark ready after loading everything
-      setIsLoading(false); // ✅ Mark loading as complete
+        if (savedProgress) {
+          setProfileProgress(parseInt(savedProgress));
+        }
+      } catch (err) {
+        console.error("Error initializing auth:", err);
+      } finally {
+        setIsAuthReady(true);
+        setIsLoading(false);
+      }
     };
 
     initializeAuth();
   }, []);
 
+  // ✅ Login (shared for both recruiter & candidate)
   const login = async (userId: string, password: string) => {
     const data = await apiFetch("/api/auth/v1/login", {
       method: "POST",
@@ -81,40 +88,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("token", data.token);
     localStorage.setItem("user", JSON.stringify(newUser));
 
-    // Redirect based on role
-    if (data.role?.toLowerCase() === "candidate") {
+    // ✅ Role-based redirect (fully safe)
+    const role = newUser.role?.toLowerCase();
+    if (role === "candidate") {
       router.push("/candidate/home");
-    } else if (data.role?.toLowerCase() === "recruiter") {
-      router.push("/recruiter/dashboard");
+    } else if (role === "recruiter") {
+      if (!newUser.profileCompleted) router.push("/recruiter/profile");
+      else router.push("/recruiter/dashboard");
     } else {
       router.push("/");
     }
   };
 
+  // ✅ Register
   const register = async (formData: any) => {
     await apiFetch("/api/auth/v1/register", {
       method: "POST",
       body: JSON.stringify(formData),
     });
-    router.push("/?registered=1");
+    router.push("/login?registered=1");
   };
 
+  // ✅ Logout (safe for both roles)
   const logout = async () => {
     try {
-      // Call logout API if token exists
       if (token) {
-        await apiFetch(
-          "/api/auth/v1/logout",
-          {
-            method: "POST",
-          },
-          token
-        );
+        await apiFetch("/api/auth/v1/logout", { method: "POST" }, token);
       }
-    } catch {
-      // Continue with local logout even if API fails
+    } catch (error) {
+      console.warn("Logout API failed:", error);
     } finally {
-      // Clear local state regardless of API success
       setUser(null);
       setToken(null);
       setIsAuthenticated(false);
@@ -122,14 +125,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem("user");
       localStorage.removeItem("profileProgress");
       localStorage.removeItem("profileFormData");
-      router.push("/");
+      router.push("/login");
     }
   };
 
-  // ✅ Update and persist profile progress
+  // ✅ Candidate-only helper (safe even if recruiter never calls it)
   const updateProfileProgress = (progress: number) => {
-    setProfileProgress(progress);
-    localStorage.setItem("profileProgress", progress.toString());
+    try {
+      setProfileProgress(progress);
+      localStorage.setItem("profileProgress", progress.toString());
+      setUser((prev) => {
+        if (!prev) return prev;
+        const updated = { ...prev, profileProgress: progress };
+        localStorage.setItem("user", JSON.stringify(updated));
+        return updated;
+      });
+    } catch (err) {
+      console.error("Error updating profile progress:", err);
+    }
   };
 
   return (
@@ -138,14 +151,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         token,
         isAuthenticated,
-        isAuthReady, // ✅ ADDED
-        isLoading, // ✅ ADDED
+        isAuthReady,
+        isLoading,
         profileProgress,
         login,
         register,
         logout,
         setUser,
-        updateProfileProgress,
+        updateProfileProgress, // safe for candidate pages only
       }}
     >
       {children}

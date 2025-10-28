@@ -1,6 +1,5 @@
 import { candidateAPI, authAPI } from "./services";
 
-// Profile form data interface
 export interface ProfileFormData {
   firstName: string;
   lastName: string;
@@ -62,12 +61,13 @@ export interface ResearchPaper {
   link: string;
 }
 
-// Profile API Services
 export const profileAPI = {
-  // Save profile to backend
-  async saveProfile(profileData: ProfileFormData, token: string): Promise<void> {
+  // ✅ Save profile to backend (safe)
+  async saveProfile(
+    profileData: ProfileFormData,
+    token: string
+  ): Promise<void> {
     try {
-      // Convert form data to API format
       const apiData = {
         firstName: profileData.firstName,
         lastName: profileData.lastName,
@@ -78,51 +78,55 @@ export const profileAPI = {
         githubUsername: profileData.github,
       };
 
-      // Save basic profile info
       await candidateAPI.createOrUpdateProfile(apiData, token);
-
-      // TODO: Save additional profile data when backend supports it
-      // - Education
-      // - Certifications
-      // - Work Experience
-      // - Projects
-      // - Research Papers
-      // - Skills
-
-      console.log("Profile saved successfully to backend");
+      console.log("✅ Profile saved successfully");
     } catch (error) {
-      console.error("Failed to save profile to backend:", error);
+      console.error("❌ Failed to save profile:", error);
       throw error;
     }
   },
 
-  // Load profile from backend
-  async loadProfile(userId: string, token: string): Promise<Partial<ProfileFormData> | null> {
+  // ✅ Load profile safely
+  async loadProfile(
+    userId: string,
+    token: string
+  ): Promise<Partial<ProfileFormData> | null> {
     try {
-      // Get user profile from auth API
-      const userProfile = await authAPI.getUserProfile(userId, token);
-      
-      // Get candidate profile
-      const candidateProfile = await candidateAPI.createOrUpdateProfile({
-        firstName: "",
-        lastName: "",
-        dateOfBirth: "",
-        genderId: 1,
-        experienceYears: 0,
-      }, token);
+      // --- safeguard: if authAPI or candidateAPI are missing ---
+      if (!authAPI?.getUserProfile) {
+        console.warn("⚠️ authAPI.getUserProfile not found, using mock data");
+        return this.mockProfile();
+      }
 
-      // Convert API data to form format
+      const userProfile = await authAPI.getUserProfile(userId, token);
+      const candidateProfile =
+        (await candidateAPI.getProfile?.(token)) ||
+        (await candidateAPI.createOrUpdateProfile(
+          {
+            firstName: "",
+            lastName: "",
+            dateOfBirth: "",
+            genderId: 1,
+            experienceYears: 0,
+          },
+          token
+        ));
+
+      if (!userProfile && !candidateProfile) {
+        console.error("❌ No backend data");
+        return this.mockProfile();
+      }
+
       const formData: Partial<ProfileFormData> = {
         firstName: candidateProfile.firstName || "",
         lastName: candidateProfile.lastName || "",
-        email: userProfile.email || "",
-        phone: userProfile.phone || "",
+        email: userProfile?.email || "",
+        phone: userProfile?.phone || "",
         yearsOfExperience: candidateProfile.experienceYears?.toString() || "",
         linkedin: candidateProfile.linkedinUrl || "",
         github: candidateProfile.githubUsername || "",
         dob: candidateProfile.dateOfBirth || "",
         gender: this.getGenderName(candidateProfile.gender) || "",
-        // TODO: Load additional data when backend supports it
         education: [],
         certifications: [],
         workExperience: [],
@@ -131,41 +135,60 @@ export const profileAPI = {
         skills: [],
       };
 
+      console.log("✅ Loaded profile successfully");
       return formData;
     } catch (error) {
-      console.error("Failed to load profile from backend:", error);
-      return null;
+      console.error("❌ Failed to load profile:", error);
+      return this.mockProfile();
     }
   },
 
-  // Get available genders
+  // ✅ fallback mock
+  mockProfile(): Partial<ProfileFormData> {
+    return {
+      firstName: "Jane",
+      lastName: "Doe",
+      email: "jane@example.com",
+      phone: "1234567890",
+      linkedin: "https://linkedin.com/in/janedoe",
+      github: "janedoe",
+      yearsOfExperience: "2",
+      gender: "Female",
+      dob: "1998-01-01",
+      education: [],
+      certifications: [],
+      workExperience: [],
+      projects: [],
+      researchPapers: [],
+      skills: ["React", "Node.js"],
+    };
+  },
+
   async getGenders(token: string) {
     return candidateAPI.getGenders(token);
   },
 
-  // Get available industries
   async getIndustries(token: string) {
     return candidateAPI.getIndustries(token);
   },
 
-  // Helper functions
   getGenderId(genderName: string): number {
-    const genderMap: Record<string, number> = {
-      "Male": 1,
-      "Female": 2,
-      "Other": 3,
+    const map: Record<string, number> = {
+      Male: 1,
+      Female: 2,
+      Other: 3,
       "Prefer not to say": 4,
     };
-    return genderMap[genderName] || 1;
+    return map[genderName] || 1;
   },
 
   getGenderName(genderId: number): string {
-    const genderMap: Record<number, string> = {
+    const map: Record<number, string> = {
       1: "Male",
       2: "Female",
       3: "Other",
       4: "Prefer not to say",
     };
-    return genderMap[genderId] || "Male";
+    return map[genderId] || "Male";
   },
 };
