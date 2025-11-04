@@ -51,24 +51,58 @@ jobs:
           tenant-id: ${{ secrets.TENANT_ID }}
           subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
 
+      # --------------------------------------------------------------
+      # 4. Setup Node.js and Install Dependencies
+      # --------------------------------------------------------------
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
-      - name: Build React (Next.js) App
-        run: |
-          npm ci
-          npm run build
-          echo "Build complete, preparing deployment package"
-          mkdir deploy
-          rsync -av --progress .next package.json node_modules public deploy/ > /dev/null
-          echo "Copied .next and dependencies to deploy/"
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Verify .next exists
+      # --------------------------------------------------------------
+      # 5. Build Next.js Application
+      # --------------------------------------------------------------
+      - name: Build Next.js App
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_BASE_URL: ${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
+
+      # --------------------------------------------------------------
+      # 6. Prepare Deployment Package
+      # --------------------------------------------------------------
+      - name: Prepare deployment package
         run: |
-          ls -la deploy/.next || (echo ".next missing!" && exit 1)
+          echo "Creating deployment directory..."
+          mkdir -p deploy
+          
+          echo "Copying build artifacts..."
+          cp -r .next deploy/
+          cp -r public deploy/
+          cp package.json deploy/
+          cp package-lock.json deploy/
+          cp next.config.ts deploy/
+          cp server.js deploy/
+          cp web.config deploy/
+          
+          echo "Copying production node_modules..."
+          cp -r node_modules deploy/
+          
+          echo "Deployment package prepared successfully"
+          echo "Package contents:"
+          ls -la deploy/
+
+      - name: Verify .next folder exists
+        run: |
+          if [ ! -d "deploy/.next" ]; then
+            echo "ERROR: .next folder is missing!"
+            exit 1
+          fi
+          echo ".next folder verified:"
+          ls -la deploy/.next
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
