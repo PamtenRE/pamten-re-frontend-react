@@ -80,7 +80,7 @@ jobs:
           mkdir -p deploy
           
           echo "Copying build artifacts..."
-          cp -r .next deploy/
+          cp -r nextjs deploy/
           cp -r public deploy/
           cp package.json deploy/
           cp package-lock.json deploy/
@@ -95,14 +95,14 @@ jobs:
           echo "Package contents:"
           ls -la deploy/
 
-      - name: Verify .next folder exists
+      - name: Verify build folder exists
         run: |
-          if [ ! -d "deploy/.next" ]; then
-            echo "ERROR: .next folder is missing!"
+          if [ ! -d "deploy/nextjs" ]; then
+            echo "ERROR: nextjs build folder is missing!"
             exit 1
           fi
-          echo ".next folder verified:"
-          ls -la deploy/.next
+          echo "nextjs folder verified:"
+          ls -la deploy/nextjs
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3

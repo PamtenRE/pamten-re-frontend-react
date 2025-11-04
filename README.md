@@ -116,7 +116,7 @@ This project uses GitHub Actions for automated deployment to Azure App Service:
 **Deployment Process:**
 1. Push to `develop` or `feature/*` branch
 2. GitHub Actions builds Next.js app
-3. Creates deployment package with `.next`, `node_modules`, and config files
+3. Creates deployment package with `nextjs/`, `node_modules/`, and config files
 4. Deploys to Azure Web App using web.config for IIS routing
 
 **Files Required for Azure:**
@@ -141,14 +141,15 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
 
 ## Troubleshooting Deployment
 
-### .next Folder Missing After Deployment
+### `nextjs` Build Folder Missing After Deployment
 
-If the `.next` folder is missing in Azure:
+If the `nextjs` folder is missing in Azure:
 
 1. **Verify Build Success**: Check GitHub Actions logs for build errors
 2. **Check Package Contents**: The workflow logs show deployment package contents
-3. **Azure Configuration**: Ensure Azure App Service is set to Node.js 22
-4. **Startup Command**: Set in Azure Portal → Configuration → General Settings:
+3. **Hidden Folders**: Azure's zip deploy can skip folders prefixed with `.`. Using `nextjs/` avoids this.
+4. **Azure Configuration**: Ensure Azure App Service is set to Node.js 22
+5. **Startup Command**: Set in Azure Portal → Configuration → General Settings:
    ```
    node server.js
    ```

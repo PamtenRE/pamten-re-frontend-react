@@ -84,8 +84,9 @@ npm run lint     # ESLint (currently disabled in builds via next.config.ts)
 
 ### Deployment (Azure App Service)
 - **GitHub Actions**: Automated on push to `develop`, `feature/*`, or `master` branches
-- **Build Output**: `.next` folder MUST be included in deployment package
-- **Required Files**: `server.js`, `web.config`, `package.json`, `node_modules/`, `.next/`, `public/`
+- **Build Output**: `nextjs/` folder (custom distDir) MUST be included in deployment package
+- **Required Files**: `server.js`, `web.config`, `package.json`, `node_modules/`, `nextjs/`, `public/`
+- **Azure Quirk**: Hidden folders (like `.next`) are skipped by Zip Deploy; `nextjs/` avoids this.
 - **Azure Config**: Set startup command to `node server.js` in App Service settings
 
 ### Path Aliases
