@@ -1,4 +1,4 @@
-tname: Deploy React Frontend to Azure
+name: Deploy React Frontend to Azure
 
 on:
   push:
