@@ -1,4 +1,4 @@
-name: Deploy React Frontend to Azure
+tname: Deploy React Frontend to Azure
 
 on:
   push:
@@ -57,24 +57,26 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Build React App
-        run: npm run build
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: nextjs-build
-          path: .
+      - name: Build React (Next.js) App
+        run: |
+          npm ci
+          npm run build
+          mkdir deploy
+          cp -R .next package.json node_modules public deploy/
+          echo "Copied build output for deployment"
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.APP_NAME }}
-          package: .
+          package: deploy
           clean: true
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextjs-build
+          path: .next
 
       - name: Verify site availability
         run: |
