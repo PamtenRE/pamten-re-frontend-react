@@ -68,3 +68,5 @@ jobs:
         with:
           app-name: ${{ env.APP_NAME }}
           package: .
+          clean: true
+
