@@ -61,9 +61,14 @@ jobs:
         run: |
           npm ci
           npm run build
+          echo "Build complete, preparing deployment package"
           mkdir deploy
-          cp -R .next package.json node_modules public deploy/
-          echo "Copied build output for deployment"
+          rsync -av --progress .next package.json node_modules public deploy/ > /dev/null
+          echo "Copied .next and dependencies to deploy/"
+
+      - name: Verify .next exists
+        run: |
+          ls -la deploy/.next || (echo ".next missing!" && exit 1)
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
@@ -76,7 +81,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: nextjs-build
-          path: .next
+          path: deploy
 
       - name: Verify site availability
         run: |
