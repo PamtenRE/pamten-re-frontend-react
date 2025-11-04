@@ -76,3 +76,6 @@ jobs:
           package: .
           clean: true
 
+      - name: Verify site availability
+        run: |
+          curl -I -f https://${{ env.APP_NAME }}.azurewebsites.net || exit 1
