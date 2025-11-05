@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "next dev --hostname 0.0.0.0 --port 3000",
     "build": "next build",
-    "start": "node server.js",
-    "start:next": "next start --hostname 0.0.0.0 --port ${PORT:-3000}",
-    "preview": "npm run build && npm run start:next",
+    "start": "node nextjs/standalone/server.js",
+    "start:azure": "node server.js",
+    "preview": "npm run build && npm run start",
     "lint": "next lint"
   },
   "dependencies": {

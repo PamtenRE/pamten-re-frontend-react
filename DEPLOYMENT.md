@@ -27,16 +27,14 @@ WEBSITE_NODE_DEFAULT_VERSION=22-lts
 ## Deployment Files
 
 ### Required Files in Deployment Package
-- ✅ `nextjs/` - Next.js build output (custom dist dir)
-- ✅ `node_modules/` - Production dependencies
-- ✅ `public/` - Static assets
-- ✅ `package.json` - Dependencies definition
-- ✅ `server.js` - Custom server for Azure
+- ✅ `nextjs/standalone/` - Next.js standalone server + minimal dependencies
+- ✅ `nextjs/static/` - Static assets served by Next.js
+- ✅ `public/` - Public assets (favicons, robots.txt, etc.)
+- ✅ `server.js` - Delegates to the standalone server (used by IISNode)
 - ✅ `web.config` - IIS routing configuration (Windows)
-- ✅ `next.config.ts` - Next.js configuration
 
 ### Files NOT in Deployment
-- ❌ `src/` - Source files (not needed, only built `nextjs/`)
+- ❌ `src/` - Source files (not needed, only built `nextjs/` output)
 - ❌ `.env*` - Use Azure App Settings instead
 - ❌ `.git/` - Version control files
 
@@ -52,8 +50,8 @@ WEBSITE_NODE_DEFAULT_VERSION=22-lts
 2. Setup Node.js 22
 3. Install dependencies (`npm ci`)
 4. Build Next.js app (`npm run build`)
-5. Prepare deployment package (copy files)
-6. Verify `nextjs/` exists
+5. Prepare deployment package (copy standalone bundle + static assets)
+6. Verify `server.js` and `nextjs/static` exist
 7. Deploy to Azure Web App
 8. Upload build artifact
 9. Verify site availability
@@ -70,9 +68,9 @@ WEBSITE_NODE_DEFAULT_VERSION=22-lts
 **Solutions:**
 1. Check GitHub Actions logs for build errors
 2. Verify `npm run build` completes successfully
-3. Ensure `cp -r nextjs deploy/` in workflow runs without errors
-4. Check `.gitignore` doesn't prevent `nextjs/` from being created
-5. Verify artifact upload includes `nextjs/` folder
+-3. Ensure `cp -r nextjs/standalone/. deploy/` in workflow runs without errors
+-4. Check `.gitignore` doesn't prevent `nextjs/` from being created
+-5. Verify artifact upload includes `nextjs/static` folder
 6. Remember: Azure Zip Deploy skips hidden folders (starting with `.`); the custom dist dir avoids that.
 
 ### Issue: Application won't start

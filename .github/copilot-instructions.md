@@ -77,15 +77,15 @@ const data = await apiFetch('/api/auth/v1/login', {
 ```bash
 npm install      # Install dependencies
 npm run dev      # Start dev server on port 3000
-npm run build    # Production build
-npm start        # Start production server (uses server.js for Azure)
+npm run build    # Production build (writes nextjs/standalone bundle)
+npm start        # Run the standalone production server locally
 npm run lint     # ESLint (currently disabled in builds via next.config.ts)
 ```
 
 ### Deployment (Azure App Service)
 - **GitHub Actions**: Automated on push to `develop`, `feature/*`, or `master` branches
-- **Build Output**: `nextjs/` folder (custom distDir) MUST be included in deployment package
-- **Required Files**: `server.js`, `web.config`, `package.json`, `node_modules/`, `nextjs/`, `public/`
+- **Build Output**: `nextjs/standalone/` + `nextjs/static/` must be copied into the deployment package
+- **Required Files**: `server.js`, `web.config`, `nextjs/standalone/`, `nextjs/static/`, `public/`
 - **Azure Quirk**: Hidden folders (like `.next`) are skipped by Zip Deploy; `nextjs/` avoids this.
 - **Azure Config**: Set startup command to `node server.js` in App Service settings
 

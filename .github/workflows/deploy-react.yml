@@ -88,32 +88,36 @@ jobs:
       - name: Prepare deployment package
         run: |
           echo "Creating deployment directory..."
+          rm -rf deploy
           mkdir -p deploy
-          
-          echo "Copying build artifacts..."
-          cp -r nextjs deploy/
-          cp -r public deploy/
-          cp package.json deploy/
-          cp package-lock.json deploy/
-          cp next.config.ts deploy/
+
+          echo "Copying standalone server bundle..."
+          cp -r nextjs/standalone/. deploy/
+
+          echo "Copying Next.js static assets..."
+          mkdir -p deploy/nextjs/static
+          cp -r nextjs/static/. deploy/nextjs/static/
+
+          echo "Copying public assets and config files..."
+          cp -r public deploy/public
           cp server.js deploy/
           cp web.config deploy/
-          
-          echo "Copying production node_modules..."
-          cp -r node_modules deploy/
-          
+
           echo "Deployment package prepared successfully"
-          echo "Package contents:"
           ls -la deploy/
 
-      - name: Verify build folder exists
+      - name: Verify standalone bundle
         run: |
-          if [ ! -d "deploy/nextjs" ]; then
-            echo "ERROR: nextjs build folder is missing!"
+          if [ ! -f "deploy/server.js" ]; then
+            echo "ERROR: standalone server.js is missing!"
             exit 1
           fi
-          echo "nextjs folder verified:"
-          ls -la deploy/nextjs
+          if [ ! -d "deploy/nextjs/static" ]; then
+            echo "ERROR: nextjs/static assets missing!"
+            exit 1
+          fi
+          echo "Standalone bundle contents:"
+          ls -la deploy
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3

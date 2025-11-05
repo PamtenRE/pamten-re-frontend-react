@@ -3,35 +3,19 @@
  * This file is used by Azure's IISNode to start the Next.js application
  */
 
-const { createServer } = require('http');
-const { parse } = require('url');
-const next = require('next');
+const path = require('path');
 
-const dev = process.env.NODE_ENV !== 'production';
-const hostname = 'localhost';
-const port = process.env.PORT || 3000;
+// Delegate to the standalone Next.js server generated during build
+const standaloneServerPath = path.join(__dirname, 'nextjs', 'standalone', 'server.js');
 
-// Initialize Next.js app
-const app = next({ dev, hostname, port });
-const handle = app.getRequestHandler();
+try {
+  // Ensure a sensible default port for Azure (falls back to 3000 locally)
+  if (!process.env.PORT) {
+    process.env.PORT = '8181';
+  }
 
-app.prepare().then(() => {
-  createServer(async (req, res) => {
-    try {
-      const parsedUrl = parse(req.url, true);
-      await handle(req, res, parsedUrl);
-    } catch (err) {
-      console.error('Error occurred handling', req.url, err);
-      res.statusCode = 500;
-      res.end('Internal server error');
-    }
-  })
-    .once('error', (err) => {
-      console.error(err);
-      process.exit(1);
-    })
-    .listen(port, () => {
-      console.log(`> Ready on http://${hostname}:${port}`);
-      console.log(`> Environment: ${process.env.NODE_ENV || 'development'}`);
-    });
-});
+  require(standaloneServerPath);
+} catch (error) {
+  console.error('Failed to boot standalone Next.js server:', error);
+  process.exit(1);
+}

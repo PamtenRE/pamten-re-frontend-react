@@ -116,19 +116,21 @@ This project uses GitHub Actions for automated deployment to Azure App Service:
 **Deployment Process:**
 1. Push to `develop` or `feature/*` branch
 2. GitHub Actions builds Next.js app
-3. Creates deployment package with `nextjs/`, `node_modules/`, and config files
+3. Creates deployment package with the Next.js standalone bundle (`nextjs/standalone`) plus static assets
 4. Deploys to Azure Web App using web.config for IIS routing
 
-**Files Required for Azure:**
-- `web.config` - IIS configuration for Next.js routing
-- `server.js` - Custom server for Azure App Service
-- `package.json` - Must include `"start": "next start -p ${PORT:-3000}"`
+**Files Included in Deployment Package:**
+- `nextjs/standalone/` → Minimal Node.js server + dependencies
+- `nextjs/static/` → Static assets served by Next.js
+- `public/` → Public assets (favicons, etc.)
+- `server.js` → Delegates to the standalone server (used by web.config)
+- `web.config` → IIS configuration for Azure App Service
 
 ### Manual Deployment
 
 ```bash
-npm run build        # Build production bundle
-npm start           # Start production server
+npm run build        # Build production bundle (generates nextjs/standalone)
+npm start           # Run standalone server locally
 ```
 
 ### Environment Variables
