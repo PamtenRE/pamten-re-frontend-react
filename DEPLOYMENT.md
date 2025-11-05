@@ -19,8 +19,8 @@ NEXT_PUBLIC_API_BASE_URL    # Backend API endpoint
 ### 3. Azure App Settings (Environment Variables)
 ```
 NODE_ENV=production
-NEXT_PUBLIC_API_BASE_URL=<your-backend-url>
-PORT=8080                   # Azure uses 8080 by default
+NEXT_PUBLIC_API_BASE_URL=https://pamten-re-backend-java-dev.azurewebsites.net
+PORT=8080                  # Azure App Service proxies incoming traffic to this port
 WEBSITE_NODE_DEFAULT_VERSION=22-lts
 ```
 
@@ -103,7 +103,7 @@ WEBSITE_NODE_DEFAULT_VERSION=22-lts
 ## Verification Steps
 
 After deployment:
-1. ✅ Visit app URL: `https://<app-name>.azurewebsites.net`
+1. ✅ Visit app URL: `https://pamten-re-frontend-react-dev.azurewebsites.net`
 2. ✅ Check browser console for errors
 3. ✅ Verify static assets load (check Network tab)
 4. ✅ Test authentication flow

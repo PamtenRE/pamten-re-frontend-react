@@ -70,7 +70,7 @@ src/
 
 - Node.js 22 or higher
 - npm or yarn package manager
-- Backend API running (default: `http://localhost:8080`)
+- Backend API running (default: `https://pamten-re-backend-java-dev.azurewebsites.net`)
 
 ### Local Development
 
@@ -133,10 +133,10 @@ npm start           # Start production server
 
 ### Environment Variables
 
-Create a `.env.local` file for local development:
+Create a `.env.local` file for local development (optional—defaults to the hosted API):
 
 ```env
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
+NEXT_PUBLIC_API_BASE_URL=https://pamten-re-backend-java-dev.azurewebsites.net
 ```
 
 ## Troubleshooting Deployment

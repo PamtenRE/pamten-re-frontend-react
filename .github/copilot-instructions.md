@@ -2,7 +2,7 @@
 
 ## Architecture Overview
 
-This is a **Next.js 15 App Router** recruitment platform with dual role support (Recruiter/Candidate). The backend API runs separately at `http://localhost:8080` by default.
+This is a **Next.js 15 App Router** recruitment platform with dual role support (Recruiter/Candidate). The backend API runs at `https://pamten-re-backend-java-dev.azurewebsites.net` by default.
 
 ### Key Architectural Patterns
 
@@ -112,7 +112,7 @@ Testimonial: extends BaseEntity, adds { quote, author, role, company, avatar }
 1. **Hydration Mismatch**: Always use `const [hydrated, setHydrated] = useState(false)` + `useEffect(() => setHydrated(true), [])` before accessing localStorage
 2. **Auth Guards**: Check `user === null` (loading) vs `!user` (not authenticated)
 3. **Dynamic Routes**: Use `[id]` folder naming for dynamic segments (Next.js 15)
-4. **Environment Variables**: Backend URL via `NEXT_PUBLIC_API_BASE_URL` (defaults to `http://localhost:8080`)
+4. **Environment Variables**: Backend URL via `NEXT_PUBLIC_API_BASE_URL` (defaults to `https://pamten-re-backend-java-dev.azurewebsites.net`)
 
 ## Integration Points
 

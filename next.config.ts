@@ -5,6 +5,8 @@ const nextConfig: NextConfig = {
 		ignoreDuringBuilds: true,
 	},
 	distDir: "nextjs",
+	reactStrictMode: true,
+	output: "standalone",
 };
 
 export default nextConfig;

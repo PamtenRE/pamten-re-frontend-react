@@ -12,6 +12,7 @@ permissions:
 
 env:
   NODE_VERSION: 22
+  NODE_ENV: production
 
 jobs:
   build-and-deploy:
@@ -51,6 +52,13 @@ jobs:
           tenant-id: ${{ secrets.TENANT_ID }}
           subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
 
+      - name: Ensure Azure app settings
+        run: |
+          az webapp config appsettings set \
+            --name "$APP_NAME" \
+            --resource-group "$RESOURCE_GROUP" \
+            --settings NODE_ENV=production NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
+
       # --------------------------------------------------------------
       # 4. Setup Node.js and Install Dependencies
       # --------------------------------------------------------------
@@ -70,6 +78,9 @@ jobs:
         run: npm run build
         env:
           NEXT_PUBLIC_API_BASE_URL: ${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
+
+      - name: Prune dev dependencies
+        run: npm prune --omit=dev
 
       # --------------------------------------------------------------
       # 6. Prepare Deployment Package
