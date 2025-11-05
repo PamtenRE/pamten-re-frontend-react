@@ -71,6 +71,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Ensure Tailwind CSS is installed
+        run: |
+          if ! npm list tailwindcss >/dev/null 2>&1; then
+            echo "Tailwind missing — reinstalling dev dependencies"
+            npm install --save-dev tailwindcss postcss autoprefixer
+          fi
+
       # --------------------------------------------------------------
       # 5. Build Next.js Application
       # --------------------------------------------------------------
