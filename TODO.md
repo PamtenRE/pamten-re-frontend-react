@@ -1,0 +1,4 @@
+- [x] Update package.json scripts to reflect Next.js app router project needs
+- [x] Adjust GitHub Actions workflow for Next.js 15 build/deploy flow
+- [x] Review README/DEPLOYMENT docs after updates
+- [x] Replace backend API base URL with https://pamten-re-backend-java-dev.azurewebsites.net/

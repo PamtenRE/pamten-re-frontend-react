@@ -1,4 +1,5 @@
-export const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+export const API_BASE =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "https://pamten-re-backend-java-dev.azurewebsites.net";
 
 export async function apiFetch(path: string, options: RequestInit = {}, authToken?: string) {
   const headers: Record<string, string> = { "Content-Type": "application/json" };

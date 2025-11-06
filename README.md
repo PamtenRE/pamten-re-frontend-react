@@ -66,16 +66,19 @@ src/
 
 ## Getting Started
 
+### Prerequisites
+
+- Node.js 22 or higher
+- npm or yarn package manager
+- Backend API running (default: `https://pamten-re-backend-java-dev.azurewebsites.net`)
+
+### Local Development
+
 First, run the development server:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install          # Install dependencies
+npm run dev          # Start dev server on port 3000
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
@@ -93,24 +96,95 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+## Deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Azure App Service Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project uses GitHub Actions for automated deployment to Azure App Service:
 
-src
--hooks
--utils
--components
--containers
+**Branch Strategy:**
+- `develop` → Deploys to Dev environment
+- `feature/**` → Deploys to Dev environment
+- `master` → Deploys to Production environment
 
----
+**Required GitHub Secrets:**
+- `CLIENT_ID` - Azure Service Principal Client ID
+- `TENANT_ID` - Azure Tenant ID
+- `SUBSCRIPTION_ID` - Azure Subscription ID
+- `NEXT_PUBLIC_API_BASE_URL` - Backend API URL
 
-api should be under app (that is sibling of components)
+**Deployment Process:**
+1. Push to `develop` or `feature/*` branch
+2. GitHub Actions builds Next.js app
+3. Creates deployment package with the Next.js standalone bundle (`nextjs/standalone`) plus static assets
+4. Deploys to Azure Web App using web.config for IIS routing
 
-reducer - if we are using redux later for state management
+**Files Included in Deployment Package:**
+- `nextjs/standalone/` → Minimal Node.js server + dependencies
+- `nextjs/static/` → Static assets served by Next.js
+- `public/` → Public assets (favicons, etc.)
+- `server.js` → Delegates to the standalone server (used by web.config)
+- `web.config` → IIS configuration for Azure App Service
 
-middleware - if you are doing some kind of websocket logic (for real time communication, messages) - for future
+### Manual Deployment
 
-## admin, dashboard, -
+```bash
+npm run build        # Build production bundle (generates nextjs/standalone)
+npm start           # Run standalone server locally
+```
+
+### Environment Variables
+
+Create a `.env.local` file for local development (optional—defaults to the hosted API):
+
+```env
+NEXT_PUBLIC_API_BASE_URL=https://pamten-re-backend-java-dev.azurewebsites.net
+```
+
+## Troubleshooting Deployment
+
+### `nextjs` Build Folder Missing After Deployment
+
+If the `nextjs` folder is missing in Azure:
+
+1. **Verify Build Success**: Check GitHub Actions logs for build errors
+2. **Check Package Contents**: The workflow logs show deployment package contents
+3. **Hidden Folders**: Azure's zip deploy can skip folders prefixed with `.`. Using `nextjs/` avoids this.
+4. **Azure Configuration**: Ensure Azure App Service is set to Node.js 22
+5. **Startup Command**: Set in Azure Portal → Configuration → General Settings:
+   ```
+   node server.js
+   ```
+
+### Common Issues
+
+**Issue**: Application won't start on Azure
+- **Solution**: Check Azure logs in Portal → Monitoring → Log Stream
+- Verify `web.config` and `server.js` are deployed
+- Ensure PORT environment variable is being used
+
+**Issue**: Static files not loading
+- **Solution**: Verify `public/` folder is included in deployment package
+- Check `web.config` allows static file serving
+
+**Issue**: API calls failing
+- **Solution**: Set `NEXT_PUBLIC_API_BASE_URL` in Azure App Service → Configuration → Application Settings
+
+## Project Structure
+
+```
+src/
+├── app/                    # Next.js 15 App Router pages
+│   ├── api/               # API routes (proxies to backend)
+│   ├── candidate/         # Candidate role pages
+│   └── recruiter/         # Recruiter role pages
+├── components/            # Shared React components
+│   ├── layout/           # Layout components (Sidebar, RecruiterLayout)
+│   └── recruiter/        # Role-specific components
+├── contexts/             # React contexts (Auth, Theme, LoginModal)
+├── hooks/                # Custom React hooks (useQueries, useAuth)
+├── lib/api/              # API client utilities
+├── providers/            # Provider wrappers (React Query, Theme)
+├── types/                # TypeScript type definitions
+└── utils/                # Utility functions
+```
