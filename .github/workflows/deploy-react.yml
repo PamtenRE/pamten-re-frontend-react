@@ -25,7 +25,8 @@ permissions:
 
 env:
   NODE_VERSION: 22
-  NODE_ENV: production
+  APP_NAME: ""
+  RESOURCE_GROUP: ""
 
 jobs:
   build-and-deploy:
@@ -83,10 +84,12 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+        env:
+          npm_config_production: "false"
 
       - name: Ensure Tailwind CSS is installed
         run: |
-          if ! npm list tailwindcss >/dev/null 2>&1; then
+          if ! npm list tailwindcss --dev >/dev/null 2>&1; then
             echo "Tailwind missing — reinstalling dev dependencies"
             npm install --save-dev tailwindcss postcss autoprefixer
           fi
@@ -97,6 +100,7 @@ jobs:
       - name: Build Next.js App
         run: npm run build
         env:
+          NODE_ENV: production
           NEXT_PUBLIC_API_BASE_URL: ${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
 
       # - name: Prune dev dependencies
