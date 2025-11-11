@@ -20,23 +20,43 @@ NEXT_PUBLIC_API_BASE_URL    # Backend API endpoint
 ```
 NODE_ENV=production
 NEXT_PUBLIC_API_BASE_URL=https://pamten-re-backend-java-dev.azurewebsites.net
-PORT=8080                  # Azure App Service proxies incoming traffic to this port
 WEBSITE_NODE_DEFAULT_VERSION=22-lts
 ```
+
+**Note about PORT:**
+- Azure App Service automatically sets the `PORT` environment variable (typically 8080)
+- The standalone Next.js server reads `PORT` from the environment
+- You do NOT need to manually configure PORT in App Settings
 
 ## Deployment Files
 
 ### Required Files in Deployment Package
-- ✅ `nextjs/standalone/` - Next.js standalone server + minimal dependencies
-- ✅ `nextjs/static/` - Static assets served by Next.js
-- ✅ `public/` - Public assets (favicons, robots.txt, etc.)
-- ✅ `server.js` - Delegates to the standalone server (used by IISNode)
-- ✅ `web.config` - IIS routing configuration (Windows)
+After building and preparing the deployment package, the following structure is deployed:
+
+**Deployed Structure:**
+```
+/
+├── server.js              - Standalone Next.js server (from nextjs/standalone/)
+├── package.json           - Runtime dependencies list
+├── node_modules/          - Minimal runtime dependencies (from standalone build)
+├── nextjs/                - Next.js build output and metadata
+│   ├── server/            - Server-side compiled pages and API routes
+│   └── static/            - Static assets (CSS, JS chunks)
+├── public/                - Public assets (favicons, robots.txt, images)
+└── web.config             - IIS/IISNode configuration (Windows App Service)
+```
+
+**Key Points:**
+- ✅ `server.js` is the standalone Next.js server (auto-generated during build)
+- ✅ The custom root `server.js` is NOT deployed (only used for local Azure testing)
+- ✅ `nextjs/` contains build output, NOT the source `nextjs/standalone/` directory
+- ✅ `web.config` configures IISNode to run `node server.js`
 
 ### Files NOT in Deployment
-- ❌ `src/` - Source files (not needed, only built `nextjs/` output)
-- ❌ `.env*` - Use Azure App Settings instead
+- ❌ `src/` - Source files (not needed, only built output)
+- ❌ `.env*` - Use Azure App Settings for environment variables
 - ❌ `.git/` - Version control files
+- ❌ Custom root `server.js` - Only for local testing, standalone version is used
 
 ## GitHub Actions Workflow
 

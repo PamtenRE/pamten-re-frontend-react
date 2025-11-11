@@ -1,10 +1,23 @@
 name: Deploy React Frontend to Azure
 
+# This workflow builds and deploys the Next.js application to Azure App Service
+# 
+# Deployment Structure:
+# 1. Build creates nextjs/standalone/ (complete server) and nextjs/static/ (assets)
+# 2. Deployment copies standalone content to root and reorganizes static assets
+# 3. Final structure: server.js at root, nextjs/ for build artifacts
+# 4. Azure runs: node server.js (the standalone Next.js server)
+#
+# Key Points:
+# - The standalone server.js handles PORT from Azure environment variable
+# - No custom server wrapper needed in deployment (only for local testing)
+# - nextjs/ directory contains build output, not the source nextjs/standalone/
+
 on:
   push:
     branches:
       - develop
-      - feature/**
+      - master
 
 permissions:
   id-token: write
@@ -12,7 +25,8 @@ permissions:
 
 env:
   NODE_VERSION: 22
-  NODE_ENV: production
+  APP_NAME: ""
+  RESOURCE_GROUP: ""
 
 jobs:
   build-and-deploy:
@@ -57,7 +71,7 @@ jobs:
           az webapp config appsettings set \
             --name "$APP_NAME" \
             --resource-group "$RESOURCE_GROUP" \
-            --settings NODE_ENV=production NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
+            --settings NODE_ENV=production NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }} SCM_DO_BUILD_DURING_DEPLOYMENT=false ENABLE_ORYX_BUILD=false
 
       # --------------------------------------------------------------
       # 4. Setup Node.js and Install Dependencies
@@ -70,10 +84,12 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+        env:
+          npm_config_production: "false"
 
       - name: Ensure Tailwind CSS is installed
         run: |
-          if ! npm list tailwindcss >/dev/null 2>&1; then
+          if ! npm list tailwindcss --dev >/dev/null 2>&1; then
             echo "Tailwind missing — reinstalling dev dependencies"
             npm install --save-dev tailwindcss postcss autoprefixer
           fi
@@ -84,6 +100,7 @@ jobs:
       - name: Build Next.js App
         run: npm run build
         env:
+          NODE_ENV: production
           NEXT_PUBLIC_API_BASE_URL: ${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
 
       # - name: Prune dev dependencies
@@ -107,8 +124,9 @@ jobs:
 
           echo "Copying public assets and config files..."
           cp -r public deploy/public
-          cp server.js deploy/
           cp web.config deploy/
+          # Note: server.js is already in deploy/ from nextjs/standalone/
+          # The custom root server.js is only for local Azure testing
 
           echo "Deployment package prepared successfully"
           ls -la deploy/
