@@ -71,7 +71,7 @@ jobs:
           az webapp config appsettings set \
             --name "$APP_NAME" \
             --resource-group "$RESOURCE_GROUP" \
-            --settings NODE_ENV=production NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
+            --settings NODE_ENV=production NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }} SCM_DO_BUILD_DURING_DEPLOYMENT=false ENABLE_ORYX_BUILD=false
 
       # --------------------------------------------------------------
       # 4. Setup Node.js and Install Dependencies
