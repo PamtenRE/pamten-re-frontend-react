@@ -15,7 +15,7 @@ try {
   // Azure App Service provides PORT via environment variable
   // Default to 8080 for local testing (Azure uses dynamic port, typically 8080)
   if (!process.env.PORT) {
-    process.env.PORT = '8080';
+    process.env.PORT = '8181';
   }
 
   console.log(`Starting Next.js server on port ${process.env.PORT}...`);
