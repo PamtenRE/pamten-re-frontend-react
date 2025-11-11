@@ -11,12 +11,12 @@ const standaloneServerPath = path.join(__dirname, 'nextjs', 'standalone', 'serve
 try {
   // Ensure a sensible default port for Azure (falls back to 3000 locally)
   if (!process.env.PORT) {
-    process.env.HOST = '0.0.0.0';
-    process.env.PORT process.env.PORT || 8080;
+    process.env.HOST = '8181';
+    process.env.PORT = process.env.PORT || 8080;
   }
 
   //Run the Next.js standalone server
-  require(path.join(__dirname, 'nextjs', 'standlone', 'server.js'));
+  require(standaloneServerPath);
 } catch (error) {
   console.error('Failed to boot standalone Next.js server:', error);
   process.exit(1);
