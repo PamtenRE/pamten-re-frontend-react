@@ -1,6 +1,8 @@
 "use client";
 
 import { ProfileFormData } from "@/utils/profileHelpers";
+import AIEnhanceButton from "@/components/candidate/AIEnhanceButton";
+import RichTextEditor from "@/components/candidate/RichTextEditor";
 
 interface BasicInfoStepProps {
   form: ProfileFormData;
@@ -171,29 +173,43 @@ export default function BasicInfoStep({
 
       {/* Professional Summary */}
       <div>
-        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Professional Summary
         </label>
-        <textarea
-          rows={4}
-          className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-3 text-gray-900 dark:text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          value={form.summary}
-          onChange={(e) => updateForm("summary", e.target.value)}
-          placeholder="Tell us about your background, goals and skills..."
+
+        <RichTextEditor
+          value={form.summary || ""}
+          onChange={(value) => updateForm("summary", value || "")}
+          rows={5}
+          placeholder="Write a brief summary about your professional experience, skills, and goals..."
+          className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-3 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+          minHeight="200px"
         />
+
+        {/* ✨ AI Enhance Button */}
+        <div className="mt-2">
+          <AIEnhanceButton
+            sectionName="Professional Summary"
+            text={form.summary}
+            onEnhance={(enhancedText) => updateForm("summary", enhancedText)}
+          />
+        </div>
       </div>
 
-      {/* Pitch Video Upload */}
-      <div>
-        <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-          2 min Pitch Video
-        </label>
-        <input
-          type="file"
-          accept="video/*"
-          onChange={(e) => updateForm("pitchVideoFile", e.target.files?.[0])}
-          className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-3 text-gray-900 dark:text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 file:mr-4 file:rounded-md file:border-0 file:bg-blue-600 file:px-3 file:py-2 file:text-white hover:file:bg-blue-700"
-        />
+      {/* File Uploads */}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        {/* Pitch Video */}
+        <div>
+          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            2 min Pitch Video
+          </label>
+          <input
+            type="file"
+            accept="video/*"
+            onChange={(e) => updateForm("pitchVideoFile", e.target.files?.[0])}
+            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-3 text-gray-900 dark:text-white focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 file:mr-4 file:rounded-md file:border-0 file:bg-blue-600 file:px-3 file:py-2 file:text-white hover:file:bg-blue-700"
+          />
+        </div>
       </div>
     </div>
   );
