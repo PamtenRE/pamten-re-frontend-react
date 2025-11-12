@@ -2,9 +2,13 @@
 
 import {
   isBasicInfoComplete,
-  isExperienceComplete,
   isSkillsComplete,
   isATSResumeComplete,
+  hasEducation,
+  hasWorkExperience,
+  hasCertifications,
+  hasProjects,
+  hasResearchPapers,
 } from "@/utils/profileHelpers";
 import { ProfileFormData } from "@/utils/profileHelpers";
 import { motion, AnimatePresence } from "framer-motion";
@@ -23,9 +27,20 @@ export default function StepNavigation({
   onStepClick,
   form,
 }: StepNavigationProps) {
+  const experienceParts = [
+    hasEducation(form),
+    hasWorkExperience(form),
+    hasCertifications(form),
+    hasProjects(form),
+    hasResearchPapers(form),
+  ];
+  const experienceCount = experienceParts.filter(Boolean).length;
+  const experienceTotal = experienceParts.length;
+  const experienceDone = experienceCount === experienceTotal;
+
   const completion = [
     isBasicInfoComplete(form),
-    isExperienceComplete(form),
+    experienceDone,
     isSkillsComplete(form),
     isATSResumeComplete(form),
   ];
@@ -77,6 +92,7 @@ export default function StepNavigation({
 
         return (
           <button
+            type="button"
             key={label}
             ref={(el: HTMLButtonElement | null) => {
               tabRefs.current[index] = el;
@@ -84,7 +100,9 @@ export default function StepNavigation({
             onClick={() => onStepClick(index)}
             className={`${baseClasses} ${colorClasses}`}
           >
-            {label}
+            {index === 1
+              ? `${label} (${experienceCount}/${experienceTotal})`
+              : label}
           </button>
         );
       })}
