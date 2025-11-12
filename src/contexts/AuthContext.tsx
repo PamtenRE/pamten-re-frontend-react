@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "../utils/api";
@@ -8,17 +8,23 @@ interface User {
   email: string;
   role: string;
   profileCompleted: boolean;
+  fullName?: string;
   token?: string;
+  profileProgress?: number;
 }
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  isAuthenticated: boolean; // ✅ new
+  isAuthenticated: boolean;
+  isAuthReady: boolean;
+  isLoading: boolean;
+  profileProgress: number;
   login: (userId: string, password: string) => Promise<void>;
   register: (formData: any) => Promise<void>;
   logout: () => void;
   setUser: (user: User | null) => void;
+  updateProfileProgress: (progress: number) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -26,37 +32,41 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // ✅ track auth
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [profileProgress, setProfileProgress] = useState(0);
+  const [isAuthReady, setIsAuthReady] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  // ✅ Load saved user/token on mount
+  // ✅ Load saved session on mount
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      const parsedUser = JSON.parse(storedUser);
-      setUser(parsedUser);
-      setIsAuthenticated(true);
-    }
+    const initializeAuth = () => {
+      try {
+        const storedToken = localStorage.getItem("token");
+        const storedUser = localStorage.getItem("user");
+        const savedProgress = localStorage.getItem("profileProgress");
+
+        if (storedToken && storedUser) {
+          setToken(storedToken);
+          setUser(JSON.parse(storedUser));
+          setIsAuthenticated(true);
+        }
+
+        if (savedProgress) {
+          setProfileProgress(parseInt(savedProgress));
+        }
+      } catch (err) {
+        console.error("Error initializing auth:", err);
+      } finally {
+        setIsAuthReady(true);
+        setIsLoading(false);
+      }
+    };
+
+    initializeAuth();
   }, []);
 
-  // ✅ Redirect effect (same logic)
-  useEffect(() => {
-    if (!user) return;
-
-    const role = user.role.toLowerCase();
-    const target =
-      role === "recruiter" && !user.profileCompleted
-        ? "/recruiter/profile"
-        : role === "recruiter"
-        ? "/recruiter/dashboard"
-        : "/candidate/dashboard";
-
-    router.push(target);
-  }, [user, router]);
-
-  // ✅ Login updates user/token/isAuthenticated
+  // ✅ Login (shared for both recruiter & candidate)
   const login = async (userId: string, password: string) => {
     const data = await apiFetch("/api/auth/v1/login", {
       method: "POST",
@@ -77,8 +87,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     localStorage.setItem("token", data.token);
     localStorage.setItem("user", JSON.stringify(newUser));
+
+    // ✅ Role-based redirect (fully safe)
+    const role = newUser.role?.toLowerCase();
+    if (role === "candidate") {
+      router.push("/candidate/home");
+    } else if (role === "recruiter") {
+      if (!newUser.profileCompleted) router.push("/recruiter/profile");
+      else router.push("/recruiter/dashboard");
+    } else {
+      router.push("/");
+    }
   };
 
+  // ✅ Register
   const register = async (formData: any) => {
     await apiFetch("/api/auth/v1/register", {
       method: "POST",
@@ -87,17 +109,58 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push("/login?registered=1");
   };
 
-  const logout = () => {
-    setUser(null);
-    setToken(null);
-    setIsAuthenticated(false);
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    router.push("/login");
+  // ✅ Logout (safe for both roles)
+  const logout = async () => {
+    try {
+      if (token) {
+        await apiFetch("/api/auth/v1/logout", { method: "POST" }, token);
+      }
+    } catch (error) {
+      console.warn("Logout API failed:", error);
+    } finally {
+      setUser(null);
+      setToken(null);
+      setIsAuthenticated(false);
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      localStorage.removeItem("profileProgress");
+      localStorage.removeItem("profileFormData");
+      router.push("/login");
+    }
+  };
+
+  // ✅ Candidate-only helper (safe even if recruiter never calls it)
+  const updateProfileProgress = (progress: number) => {
+    try {
+      setProfileProgress(progress);
+      localStorage.setItem("profileProgress", progress.toString());
+      setUser((prev) => {
+        if (!prev) return prev;
+        const updated = { ...prev, profileProgress: progress };
+        localStorage.setItem("user", JSON.stringify(updated));
+        return updated;
+      });
+    } catch (err) {
+      console.error("Error updating profile progress:", err);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated, login, register, logout, setUser }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        isAuthenticated,
+        isAuthReady,
+        isLoading,
+        profileProgress,
+        login,
+        register,
+        logout,
+        setUser,
+        updateProfileProgress, // safe for candidate pages only
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

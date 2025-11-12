@@ -24,7 +24,7 @@ export const ROUTES = {
     REQUISITIONS: "/recruiter/requisitions",
   },
   CANDIDATE: {
-    DASHBOARD: "/candidate/dashboard",
+    DASHBOARD: "/candidate/home",
     PROFILE: "/candidate/profile",
   },
 } as const;

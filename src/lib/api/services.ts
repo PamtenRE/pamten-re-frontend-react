@@ -1,4 +1,6 @@
+// src/lib/api/services.ts
 import { apiRequest } from "./core";
+import { apiFetch } from "@/utils/api";
 import type { Testimonial, Feature, Benefit } from "@/types";
 
 export interface HomePageData {
@@ -10,8 +12,10 @@ export interface HomePageData {
   benefits: Benefit[];
 }
 
+//
+// 🏠 HOME SERVICE – Landing Page APIs
+//
 export const homeService = {
-  // Get all data needed for homepage
   async getHomePageData(): Promise<HomePageData> {
     const [testimonials, features, benefits] = await Promise.all([
       this.getTestimonials(),
@@ -21,7 +25,7 @@ export const homeService = {
 
     return {
       testimonials: testimonials.data,
-      features, // features is already in the correct format
+      features,
       benefits: benefits.data,
     };
   },
@@ -45,4 +49,103 @@ export const homeService = {
   async getBenefits() {
     return apiRequest<Benefit[]>("/api/benefits");
   },
+};
+
+//
+// 👩‍💼 CANDIDATE APIs
+//
+export const candidateAPI = {
+  getApplications: (userId: string, token?: string) =>
+    apiFetch(`/api/applications/v1/candidate/${userId}`, {}, token),
+
+  getProfile: (userId: string, token?: string) =>
+    apiFetch(`/api/profile/v1/candidate/${userId}`, {}, token),
+
+  createOrUpdateProfile: (data: any, token?: string) =>
+    apiFetch(
+      `/api/profile/v1/candidate`,
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      },
+      token
+    ),
+
+  getGenders: (token?: string) => apiFetch(`/api/master/v1/genders`, {}, token),
+
+  getIndustries: (token?: string) =>
+    apiFetch(`/api/master/v1/industries`, {}, token),
+};
+
+//
+// 🧑‍💼 RECRUITER APIs
+//
+export const recruiterAPI = {
+  getJobs: (recruiterId: string, token?: string) =>
+    apiFetch(`/api/jobs/v1/recruiter/${recruiterId}`, {}, token),
+
+  createJob: (data: any, token?: string) =>
+    apiFetch(
+      `/api/jobs/v1/create`,
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      },
+      token
+    ),
+};
+
+//
+// 💼 JOBS APIs (shared by candidate & recruiter)
+//
+export const jobsAPI = {
+  // ✅ Candidate Browse Jobs
+  getAllJobs: async (page = 0, size = 20, token?: string) => {
+    const url = `/api/jobs/v1/all?page=${page}&size=${size}`;
+    console.log("🌐 Fetching jobs from:", url);
+
+    try {
+      // Try with token first
+      const response = await apiFetch(url, {}, token);
+      console.log("✅ Jobs fetched:", response);
+      return response;
+    } catch (err) {
+      console.warn("⚠️ apiFetch failed, retrying without token...", err);
+      try {
+        // Retry without Authorization header
+        const fallback = await apiRequest(url);
+        console.log("✅ Fallback jobs fetched:", fallback);
+        return fallback;
+      } catch (error) {
+        console.error("❌ Both job fetch attempts failed:", error);
+        throw error;
+      }
+    }
+  },
+
+  // ✅ Recruiter Dashboard Jobs
+  getRecruiterJobs: async (recruiterId: string, token?: string) => {
+    console.log("📡 Fetching recruiter jobs...");
+    return apiFetch(`/api/jobs/v1/recruiter/${recruiterId}`, {}, token);
+  },
+};
+
+//
+// 🔐 AUTH APIs
+//
+export const authAPI = {
+  login: (userId: string, password: string) =>
+    apiFetch(`/api/auth/v1/login`, {
+      method: "POST",
+      body: JSON.stringify({ userId, password }),
+    }),
+
+  register: (formData: any) =>
+    apiFetch(`/api/auth/v1/register`, {
+      method: "POST",
+      body: JSON.stringify(formData),
+    }),
+
+  getUserProfile: (userId: string, token: string) =>
+    apiFetch(`/api/users/v1/${userId}`, {}, token),
 };

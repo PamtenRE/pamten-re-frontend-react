@@ -1,17 +1,25 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { Briefcase, Users, ClipboardList, LogOut } from 'lucide-react';
-import RecruitEdgeLogo from '@/components/RecruitEdgeLogo'; // Added import for RecruitEdgeLogo
-import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import {
+  Briefcase,
+  Users,
+  ClipboardList,
+  ClipboardCheck,
+  LogOut,
+  PanelLeftClose,
+  PanelLeftOpen,
+} from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 const iconMap: Record<string, React.ReactNode> = {
-  Briefcase: <Briefcase size={20} />,
-  ClipboardList: <ClipboardList size={20} />,
-  Users: <Users size={20} />,
+  Briefcase: <Briefcase size={20} strokeWidth={1.8} />,
+  ClipboardList: <ClipboardList size={20} strokeWidth={1.8} />,
+  ClipboardCheck: <ClipboardCheck size={20} strokeWidth={1.8} />,
+  Users: <Users size={20} strokeWidth={1.8} />,
 };
 
 interface NavLink {
@@ -20,7 +28,12 @@ interface NavLink {
   icon: keyof typeof iconMap;
 }
 
-export default function Sidebar() {
+interface SidebarProps {
+  collapsed: boolean;
+  setCollapsed: (collapsed: boolean) => void;
+}
+
+export default function Sidebar({ collapsed, setCollapsed }: SidebarProps) {
   const pathname = usePathname();
   const { logout } = useAuth();
   const router = useRouter();
@@ -29,13 +42,24 @@ export default function Sidebar() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/sidebar-links')
+    fetch("/api/sidebar-links")
       .then((res) => {
-        if (!res.ok) throw new Error('Failed to fetch sidebar links');
+        if (!res.ok) throw new Error("Failed to fetch sidebar links");
         return res.json();
       })
       .then((data) => {
-        setNavLinks(data.links || []);
+        const filtered = (data.links || []).filter(
+          (link: any) => link.name.toLowerCase() !== "recruitedge"
+        );
+        const allLinks = [
+          ...filtered,
+          {
+            name: "Applications",
+            href: "/recruiter/applications",
+            icon: "ClipboardCheck" as keyof typeof iconMap,
+          },
+        ];
+        setNavLinks(allLinks);
         setLoading(false);
       })
       .catch((err) => {
@@ -45,50 +69,97 @@ export default function Sidebar() {
   }, []);
 
   return (
-    <aside className="fixed top-0 left-0 h-full w-60 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-lg border-r border-gray-200 dark:border-zinc-800 p-6 flex flex-col justify-between transition-colors duration-300">
-      <div>
-        <Link href="/" className="flex items-center gap-2 text-2xl font-bold text-gray-900 dark:text-white mb-8 block">
-          <span className="inline-block align-middle"><RecruitEdgeLogo className="w-8 h-8" /></span>
-          RecruitEdge
-        </Link>
-        <nav className="space-y-4">
-          {loading ? (
-            <div className="text-center text-gray-900 dark:text-white py-4">Loading links...</div>
-          ) : error ? (
-            <div className="text-center text-red-400 py-4">{error}</div>
-          ) : navLinks.length === 0 ? (
-            <div className="text-center text-gray-900 dark:text-white py-4">No links found.</div>
+    <aside
+      className={`fixed left-0 z-40 flex flex-col justify-between
+      backdrop-blur-xl transition-all duration-300 ease-in-out
+      shadow-[var(--sidebar-shadow)]
+      ${collapsed ? "w-20" : "w-60"}
+      border-r border-[var(--sidebar-border)]`}
+      style={{
+        background: "var(--sidebar-bg)",
+        top: "70px",
+        height: "calc(100vh - 70px)",
+      }}
+    >
+      {/* Header with Logo + Collapse Button */}
+      <div
+        className={`flex items-center justify-between w-full px-4 pt-4 ${
+          collapsed ? "flex-col gap-2" : ""
+        }`}
+      >
+        {/* Collapse Toggle */}
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="p-2 rounded-lg hover:bg-[var(--sidebar-hover)] transition-all text-[var(--sidebar-text)]"
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {collapsed ? (
+            <PanelLeftOpen size={28} />
           ) : (
-            navLinks.map((link) => (
+            <PanelLeftClose size={28} />
+          )}
+        </button>
+      </div>
+
+      {/* Nav Links */}
+      <nav className="flex flex-col items-center justify-start w-full mt-6 space-y-2 px-3 flex-1 overflow-y-auto">
+        {loading ? (
+          <div className="text-[var(--sidebar-text)]/60 py-4 text-sm">
+            Loading...
+          </div>
+        ) : error ? (
+          <div className="text-red-500 py-4 text-sm">{error}</div>
+        ) : (
+          navLinks.map((link) => {
+            const active = pathname.startsWith(link.href);
+
+            return (
               <Link
                 key={link.name}
                 href={link.href}
-                className={`flex items-center gap-3 text-gray-900 dark:text-white px-3 py-2 rounded-lg transition ${
-                  pathname === link.href ? 'bg-purple-100 dark:bg-zinc-800' : 'hover:bg-purple-50 dark:hover:bg-zinc-800/60'
-                }`}
+                className={`flex items-center gap-3 w-full px-4 py-2.5 rounded-xl transition-all duration-300
+                  ${collapsed ? "justify-center" : "justify-start"}
+                  ${
+                    active
+                      ? "bg-gradient-to-r from-[#9f6eff] to-[#6e49ff] text-white shadow-[0_0_20px_rgba(147,51,234,0.3)]"
+                      : "text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover)] hover:text-[var(--sidebar-active-text)]"
+                  }`}
               >
-                {iconMap[link.icon]}
-                {link.name}
+                <span
+                  className={`${
+                    active
+                      ? "text-white drop-shadow-[0_0_6px_rgba(147,51,234,0.8)]"
+                      : "opacity-80"
+                  }`}
+                >
+                  {iconMap[link.icon]}
+                </span>
+                {!collapsed && (
+                  <span className="text-sm font-medium tracking-wide">
+                    {link.name}
+                  </span>
+                )}
               </Link>
-            ))
-          )}
-          <Link
-            href="/recruiter/applications"
-            className="flex items-center gap-3 text-gray-900 dark:text-white px-3 py-2 rounded-lg transition hover:bg-purple-50 dark:hover:bg-zinc-800/60 hover:text-purple-600 dark:hover:text-purple-400"
-          >
-            <span role="img" aria-label="Applications">📋</span> Applications
-          </Link>
-        </nav>
-      </div>
+            );
+          })
+        )}
+      </nav>
 
+      {/* Logout */}
       <button
-        className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition"
+        className={`flex items-center gap-2 text-sm transition-all mb-6 w-full ${
+          collapsed ? "justify-center" : "justify-start px-4"
+        }`}
+        style={{
+          color: "var(--sidebar-text)",
+        }}
         onClick={() => {
           logout();
-          router.push('/');
+          router.push("/");
         }}
       >
-        <LogOut size={18} /> Logout
+        <LogOut size={18} />
+        {!collapsed && "Logout"}
       </button>
     </aside>
   );

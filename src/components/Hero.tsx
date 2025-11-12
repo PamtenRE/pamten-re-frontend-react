@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useContext, useEffect, useState } from 'react';
-import { ModalContext } from '@/contexts/LoginModalContext';
-import { motion } from 'framer-motion';
+import { useContext, useEffect, useState } from "react";
+import { ModalContext } from "@/contexts/LoginModalContext";
+import { motion } from "framer-motion";
 import {
   RocketIcon,
   UsersIcon,
   ShieldIcon,
   ActivitySquareIcon,
-} from 'lucide-react';
+} from "lucide-react";
 
 const iconMap: Record<string, React.ElementType> = {
   UsersIcon,
@@ -30,9 +30,9 @@ export default function Hero() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/benefits')
+    fetch("/api/benefits")
       .then((res) => {
-        if (!res.ok) throw new Error('Failed to fetch benefits');
+        if (!res.ok) throw new Error("Failed to fetch benefits");
         return res.json();
       })
       .then((data) => {
@@ -57,7 +57,8 @@ export default function Hero() {
           Your Next Career Starts Here
         </motion.h1>
         <p className="text-lg text-gray-600 dark:text-gray-300 mt-4 max-w-xl mx-auto">
-          Connecting top talent with leading companies worldwide. Find your dream job or the perfect candidate today.
+          Connecting top talent with leading companies worldwide. Find your
+          dream job or the perfect candidate today.
         </p>
         <div className="mt-8 flex justify-center gap-4">
           <button
@@ -71,7 +72,9 @@ export default function Hero() {
 
       <div className="mt-24 grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-4 px-6 max-w-6xl mx-auto">
         {loading ? (
-          <div className="text-center text-white py-10">Loading features...</div>
+          <div className="text-center text-white py-10">
+            Loading features...
+          </div>
         ) : error ? (
           <div className="text-center text-red-400 py-10">{error}</div>
         ) : benefits.length === 0 ? (
@@ -87,8 +90,12 @@ export default function Hero() {
                 transition={{ duration: 0.3 }}
               >
                 <Icon className="mx-auto h-8 w-8 text-purple-400 mb-4" />
-                <h3 className="text-gray-900 dark:text-white font-semibold text-lg">{item.title}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">{item.desc}</p>
+                <h3 className="text-gray-900 dark:text-white font-semibold text-lg">
+                  {item.title}
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">
+                  {item.desc}
+                </p>
               </motion.div>
             );
           })
