@@ -7,7 +7,10 @@ interface User {
   userId: string;
   email: string;
   role: string;
+  location?: string;
   profileCompleted: boolean;
+  firstName?: string;
+  lastName?: string;
   fullName?: string;
   token?: string;
   profileProgress?: number;

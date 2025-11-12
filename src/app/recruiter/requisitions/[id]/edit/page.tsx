@@ -23,7 +23,7 @@ type Requisition = {
   description?: string;
   billRate?: number;
   payExact?: number;
-  rateUnit?: string;
+  rateUnit?: "per year" | "per hour" | "per day" | "per month";
   durationMonths?: number;
   status?: "Open" | "Closed" | "In Review" | "Published" | "draft";
   postedDate?: string;
@@ -97,7 +97,7 @@ export default function EditRequisitionPage() {
             method: "PUT",
             body: JSON.stringify({ ...updatedData, status }),
           },
-          token
+          token || undefined
         );
         alert("✅ Job updated successfully!");
       } else {

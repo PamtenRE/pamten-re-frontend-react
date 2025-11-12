@@ -8,6 +8,9 @@ interface RichTextEditorProps {
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
+  modules?: any; // ✅ Add this line
+  formats?: string[];
+  className?: string;
 }
 
 export default function RichTextEditor({
@@ -16,7 +19,6 @@ export default function RichTextEditor({
   placeholder = "Write your job description here...",
 }: RichTextEditorProps) {
   const { quill, quillRef } = useQuill({
-    theme: "snow",
     placeholder,
     modules: {
       toolbar: [
@@ -34,7 +36,7 @@ export default function RichTextEditor({
     /** ✅ Replace Quill’s built-in paste handler */
     const Clipboard = quill.getModule("clipboard");
 
-    Clipboard.addMatcher(Node.ELEMENT_NODE, (node) => {
+    (Clipboard as any).addMatcher(Node.ELEMENT_NODE, (node: any) => {
       const text = node.textContent || "";
       return quill.clipboard.convert({ text });
     });

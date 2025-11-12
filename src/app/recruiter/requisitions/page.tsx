@@ -53,6 +53,7 @@ export default function RequisitionListPage() {
       setError(null);
 
       try {
+        if (!user || !token) return;
         const backendData: BackendJob[] = await apiFetch(
           `/api/jobs/v1/employer/${user.userId}`,
           {},

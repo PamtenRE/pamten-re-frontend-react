@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import RecruiterLayout from "@/components/layout/RecruiterLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiFetch } from "@/utils/api";
+
 import {
   ArrowLeft,
   Building2,
@@ -33,6 +34,7 @@ type Requisition = {
   employmentType?: string;
   payExact?: number;
   rateUnit?: string;
+  requiredSkills?: string[]; 
   source?: "backend" | "local";
 };
 
@@ -85,7 +87,7 @@ export default function RequisitionDetailPage() {
           localStorage.getItem("localRequisitions") || "[]"
         );
         const foundLocal = localJobs.find(
-          (job) => String(job.id) === String(id)
+          (job) => String(job.jobId) === String(id)
         );
 
         if (foundLocal) {
