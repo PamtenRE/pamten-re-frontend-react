@@ -1,0 +1,166 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================================================
+   🌗 GLOBAL BASE STYLES (Theme-aware)
+   ========================================================= */
+body {
+  @apply transition-colors duration-300;
+  @apply text-gray-900 dark:text-white;
+  font-family: "Inter", sans-serif;
+  background: var(--bg-primary);
+}
+
+/* =========================================================
+   🪟 GLASSMORPHISM UTILITY
+   ========================================================= */
+.glass {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow-soft);
+  @apply backdrop-blur-xl rounded-2xl transition-all duration-300;
+}
+
+.glass:hover {
+  @apply transition-all duration-300;
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
+}
+
+.dark .glass:hover {
+  background: rgba(24, 24, 27, 0.8);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+}
+
+/* =========================================================
+   🧠 TEXT UTILITIES
+   ========================================================= */
+.text-muted {
+  @apply text-gray-600 dark:text-gray-400;
+}
+
+.text-primary {
+  @apply text-gray-900 dark:text-zinc-300;
+}
+
+/* =========================================================
+   💬 TOOLTIP
+   ========================================================= */
+.tooltip {
+  @apply absolute bottom-6 left-1/2 transform -translate-x-1/2
+  bg-gray-800 dark:bg-zinc-800 text-white text-xs px-2 py-1
+  rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* =========================================================
+   🫧 BLOB ANIMATIONS
+   ========================================================= */
+@keyframes blob1 {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+@keyframes blob2 {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-40px, 40px) scale(1.1);
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+.animate-blob1 {
+  animation: blob1 20s infinite ease-in-out;
+}
+
+.animate-blob2 {
+  animation: blob2 30s infinite ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-blob1,
+  .animate-blob2 {
+    animation: none;
+  }
+}
+
+/* =========================================================
+   🧾 FORM INPUT DEFAULTS
+   ========================================================= */
+.input {
+  @apply w-full px-3 py-2 rounded-lg bg-white/10 border border-white/10 text-white placeholder-gray-400
+  focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-400;
+}
+
+.input:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+select.input option {
+  @apply bg-neutral-900 text-white;
+}
+
+/* =========================================================
+   🎨 THEME VARIABLES
+   ========================================================= */
+
+/* ---------- 🌞 LIGHT THEME ---------- */
+:root {
+  --bg-primary: #f8f9ff;
+  --bg-card: #ffffff;
+  --bg-glass: rgba(255, 255, 255, 0.7);
+
+  --text-primary: #2e2e48;
+  --text-secondary: #8a8ca3;
+
+  --accent-from: #9f6eff;
+  --accent-to: #6e49ff;
+
+  --border-soft: rgba(0, 0, 0, 0.06);
+  --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.04);
+
+  /* Sidebar theme (light) */
+  --sidebar-bg: #ffffff;
+  --sidebar-border: rgba(0, 0, 0, 0.03);
+  --sidebar-text: #2e2e48;
+  --sidebar-hover: rgba(159, 110, 255, 0.08);
+  --sidebar-active-text: #ffffff;
+  --sidebar-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+}
+
+/* ---------- 🌚 DARK THEME ---------- */
+.dark {
+  --bg-primary: #0b0b10;
+  --bg-card: #1a1a24;
+  --bg-glass: rgba(24, 24, 27, 0.6);
+
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1b3;
+
+  --accent-from: #7c3aed;
+  --accent-to: #4c1d95;
+
+  --border-soft: rgba(255, 255, 255, 0.08);
+  --shadow-soft: 0 0 25px rgba(124, 58, 237, 0.3);
+
+  /* Sidebar theme (dark) */
+  --sidebar-bg: rgba(24, 24, 27, 0.95);
+  --sidebar-border: rgba(255, 255, 255, 0.02); /* ✅ removes white line */
+  --sidebar-text: #d1d1d1;
+  --sidebar-hover: rgba(255, 255, 255, 0.05);
+  --sidebar-active-text: #ffffff;
+  --sidebar-shadow: 0 0 25px rgba(0, 0, 0, 0.25);
+}
