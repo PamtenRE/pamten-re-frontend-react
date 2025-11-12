@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -7,6 +7,8 @@ import {
   isExperienceComplete,
   isSkillsComplete,
   isATSResumeComplete,
+  hasEducation,
+  hasWorkExperience,
 } from "@/utils/profileHelpers";
 
 interface ProfileCompletionBarProps {
@@ -39,7 +41,10 @@ export default function ProfileCompletionBar({
       <div className="mt-3 flex justify-between text-xs text-gray-500 dark:text-gray-400">
         {[
           { label: "Basic Info", check: isBasicInfoComplete(form) },
-          { label: "Experience", check: isExperienceComplete(form) },
+          {
+            label: "Experience",
+            check: hasEducation(form) && hasWorkExperience(form),
+          },
           { label: "Skills", check: isSkillsComplete(form) },
           { label: "Resume", check: isATSResumeComplete(form) },
         ].map((item) => (
