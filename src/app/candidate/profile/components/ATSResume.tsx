@@ -9,6 +9,7 @@ interface ATSResumeStepProps {
     key: K,
     value: ProfileFormData[K]
   ) => void;
+  onPrefill?: (parsed: any) => Promise<void>;
 }
 
 export default function ATSResumeStep({

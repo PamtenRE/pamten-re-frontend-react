@@ -16,6 +16,8 @@ interface JobCardProps {
     employmentType?: string;
     tags?: string[];
     jobType?: string;
+    requiredSkills?: string[]; // ✅ Add this
+
   };
   onApply?: (jobId: string) => void;
   onSave?: (jobId: string) => void;

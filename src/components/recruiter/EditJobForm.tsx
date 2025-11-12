@@ -29,9 +29,10 @@ export type EditJobFormData = {
   salaryMin?: number;
   salaryMax?: number;
   payExact?: number;
-  rateUnit: string;
+  rateUnit: "per year" | "per hour" | "per day" | "per month";
   hideSalary: boolean;
-  status: "draft" | "Open" | "In Review" | "Closed";
+  status: "draft" | "Open" | "In Review" | "Closed" | "Published";
+  requiredSkills: string[];
   attachmentName?: string;
   attachmentFile?: File | null;
 };
@@ -63,6 +64,7 @@ export default function EditJobForm({
     rateUnit: existingData.rateUnit || "per year",
     hideSalary: existingData.hideSalary || false,
     status: existingData.status || "draft",
+    requiredSkills: existingData.requiredSkills || [],
     attachmentName: existingData.attachmentName,
     attachmentFile: existingData.attachmentFile || null,
   });
@@ -207,6 +209,31 @@ export default function EditJobForm({
               value={form.employmentType}
               onChange={(v) => handleChange("employmentType", v as any)}
             />
+          </div>
+          <div>
+            <LabelRow
+              icon={<CheckCircle2 size={16} />}
+              label="Required Skills"
+            />
+            <input
+              type="text"
+              placeholder="e.g. React, Node.js, TypeScript"
+              value={form.requiredSkills.join(", ")}
+              onChange={(e) =>
+                handleChange(
+                  "requiredSkills",
+                  e.target.value.split(",").map((s) => s.trim())
+                )
+              }
+              className="w-full p-3 rounded-lg border 
+               bg-white dark:bg-white/10 
+               border-gray-300 dark:border-white/10 
+               text-gray-800 dark:text-white 
+               focus:ring-2 focus:ring-purple-500"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Separate multiple skills with commas.
+            </p>
           </div>
         </div>
       </GlassCard>

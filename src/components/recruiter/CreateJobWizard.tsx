@@ -60,7 +60,6 @@ export function DynamicReactQuill({
   return (
     <div className="relative">
       <RichTextEditor
-        theme="snow"
         value={value}
         onChange={onChange}
         modules={modules}
@@ -106,6 +105,7 @@ export type JobFormData = {
   category: string;
   description: string;
   responsibilities: string;
+  requiredSkills: string[];
   skills: string[];
   attachmentName?: string;
   attachmentFile?: File | null;
@@ -137,6 +137,7 @@ const defaultData: JobFormData = {
   description: "",
   responsibilities: "",
   skills: [],
+  requiredSkills: [],
   attachmentName: undefined,
   attachmentFile: null,
   payType: "range",
@@ -227,7 +228,7 @@ export default function CreateJobWizard({
       const firstKey = Object.keys(allErrors)[0];
       setStep(stepIndexForField(firstKey));
       setTimeout(() => {
-        refs[firstKey]?.current?.scrollIntoView({
+        refs[firstKey as keyof typeof refs]?.current?.scrollIntoView({
           behavior: "smooth",
           block: "center",
         });
@@ -430,6 +431,26 @@ export default function CreateJobWizard({
                   onChange={(v) => update("employmentType", v as any)}
                 />
                 <FieldError message={errors.employmentType} />
+              </GlassCard>
+
+              <GlassCard>
+                <LabelRow
+                  label="Required Skills"
+                  icon={<CheckCircle2 size={16} />}
+                />
+                <FormInput
+                  placeholder="e.g. React, Node.js, TypeScript"
+                  value={data.requiredSkills.join(", ")}
+                  onChange={(e) =>
+                    update(
+                      "requiredSkills",
+                      e.target.value.split(",").map((s) => s.trim())
+                    )
+                  }
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Separate multiple skills with commas.
+                </p>
               </GlassCard>
             </section>
           )}

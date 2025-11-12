@@ -25,6 +25,10 @@ interface RichTextEditorProps {
   minHeight?: string;
   maxHeight?: string;
   sectionName?: string;
+  rows?: number;
+  className?: string;
+  modules?: any; // ✅ Add this line
+  formats?: string[];
 }
 
 export default function RichTextEditor({

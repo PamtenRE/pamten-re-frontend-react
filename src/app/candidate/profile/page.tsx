@@ -22,6 +22,7 @@ import { profileAPI } from "@/lib/api/profile";
 import { useToast } from "@/components/ui/Toast";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+// @ts-ignore
 import htmlDocx from "html-docx-js/dist/html-docx";
 
 export default function CandidateProfilePage() {

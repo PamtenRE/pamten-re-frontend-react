@@ -29,7 +29,9 @@ export interface Benefit extends BaseEntity {
 // User Types
 export interface User extends BaseEntity {
   email: string;
-  name: string;
+  firstName?: string;
+  lastName?: string;
+  location?: string;
   role: "candidate" | "recruiter" | "admin";
   avatar?: string;
 }
@@ -44,3 +46,4 @@ export interface LoginCredentials {
   email: string;
   password: string;
 }
+

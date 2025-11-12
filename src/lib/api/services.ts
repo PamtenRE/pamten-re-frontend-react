@@ -75,6 +75,43 @@ export const candidateAPI = {
 
   getIndustries: (token?: string) =>
     apiFetch(`/api/master/v1/industries`, {}, token),
+
+  getResumes: async (email: string, token?: string) => {
+    return apiFetch(`/api/candidate/v1/resumes/${email}`, {}, token);
+  },
+
+  uploadResume: async (
+    file: File,
+    email: string,
+    isDefault: boolean,
+    folder?: string,
+    token?: string
+  ) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("email", email);
+    formData.append("isDefault", String(isDefault));
+    if (folder) formData.append("folder", folder);
+
+    return apiFetch(
+      "/api/candidate/v1/upload-resume",
+      {
+        method: "POST",
+        body: formData,
+      },
+      token
+    );
+  },
+
+  // Temporary mock for Apply Job API
+  applyToJob: async (applicationData: any, token?: string) => {
+    console.log("🧩 Mock applyToJob called:", applicationData);
+    // Return mock success so your UI works
+    return Promise.resolve({
+      success: true,
+      message: "Mock: Job application submitted successfully",
+    });
+  },
 };
 
 //
