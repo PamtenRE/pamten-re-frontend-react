@@ -1,5 +1,8 @@
 export const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+// ✅ Add this python api base for resume-builder
+export const PYTHON_API_BASE = process.env.NEXT_PUBLIC_PYTHON_API_URL;
+
 if (!API_BASE) {
   throw new Error(
     "❌ Missing environment variable: NEXT_PUBLIC_API_BASE_URL. Please define it in your .env.local file."
