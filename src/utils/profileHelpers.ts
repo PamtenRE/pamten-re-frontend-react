@@ -4,7 +4,7 @@
  */
 
 export interface ProfileFormData {
-  // Basic Info (15%)
+  // Basic Info
   firstName: string;
   lastName: string;
   dob: string;
@@ -19,14 +19,14 @@ export interface ProfileFormData {
   resumeFile?: File;
   pitchVideoFile?: File;
   
-  // Experience (45%)
+  // Experience
   education: Array<{id: string, degree: string, field: string, school: string, year: string}>;
   certifications: Array<{id: string, name: string, issuer: string, credentialUrl: string, image?: File}>;
   workExperience: Array<{id: string, title: string, company: string, startDate: string, endDate: string, location: string, description: string}>;
   projects: Array<{id: string, name: string, description: string, link: string}>;
   researchPapers: Array<{id: string, title: string, link: string}>;
   
-  // Skills (60%)
+  // Skills
   skills: string[];
 }
 
@@ -34,28 +34,39 @@ export interface ProfileFormData {
  * Calculate if Basic Info section is complete
  */
 export function isBasicInfoComplete(data: ProfileFormData): boolean {
-  return !!(
-    data.firstName ||
-    data.lastName ||
-    data.email ||
-    data.dob ||
-    data.gender ||
-    data.phone ||
-    data.location ||
-    data.summary
-  );
+  // Stricter basic info: require essential fields
+  const hasName = !!(data.firstName && data.lastName);
+  const hasContact = !!(data.email && data.location);
+  return hasName && hasContact;
 }
 
 /**
  * Calculate if Experience section is complete
  */
+export function hasEducation(data: ProfileFormData): boolean {
+  return data.education.length > 0;
+}
+
+export function hasWorkExperience(data: ProfileFormData): boolean {
+  return data.workExperience.length > 0;
+}
+
+export function hasCertifications(data: ProfileFormData): boolean {
+  return data.certifications.length > 0;
+}
+
+export function hasProjects(data: ProfileFormData): boolean {
+  return data.projects.length > 0;
+}
+
+export function hasResearchPapers(data: ProfileFormData): boolean {
+  return data.researchPapers.length > 0;
+}
+
 export function isExperienceComplete(data: ProfileFormData): boolean {
-  return !!(
-    data.education.length > 0 ||
-    data.workExperience.length > 0 ||
-    data.certifications.length > 0 ||
-    data.projects.length > 0 ||
-    data.researchPapers.length > 0
+  return (
+    hasEducation(data) &&
+    hasWorkExperience(data)
   );
 }
 
@@ -77,14 +88,34 @@ export function isATSResumeComplete(data: ProfileFormData): boolean {
  * Calculate overall profile completion percentage
  */
 export function calculateProfileProgress(data: ProfileFormData): number {
+  // Additive model to reach 100%
+  // Weights: Basic 25, Experience 35 (7 each across 5 subsections), Skills 20, Resume 20
   let progress = 0;
-  
-  if (isBasicInfoComplete(data)) progress = 15;
-  if (isExperienceComplete(data)) progress = 45;
-  if (isSkillsComplete(data)) progress = 60;
-  if (isATSResumeComplete(data)) progress = 85;
-  
-  return progress;
+
+  // Basic (25)
+  if (isBasicInfoComplete(data)) progress += 25;
+
+  // Experience (up to 35)
+  const experienceBuckets = [
+    hasEducation(data),
+    hasWorkExperience(data),
+    hasCertifications(data),
+    hasProjects(data),
+    hasResearchPapers(data),
+  ];
+  const perBucket = 35 / experienceBuckets.length; // 7 each
+  experienceBuckets.forEach((b) => {
+    if (b) progress += perBucket;
+  });
+
+  // Skills (20)
+  if (isSkillsComplete(data)) progress += 20;
+
+  // Resume (20)
+  if (isATSResumeComplete(data)) progress += 20;
+
+  // Clamp to 100
+  return Math.min(100, Math.round(progress));
 }
 
 /**
