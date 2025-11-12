@@ -67,6 +67,12 @@ export const profileAPI = {
     profileData: ProfileFormData,
     token: string
   ): Promise<void> {
+    // TODO: Backend API - Database not ready yet
+    // Temporarily bypassing backend calls - saving to localStorage only
+    console.warn("⚠️ Backend database unavailable - profile saved locally only");
+    return; // Will use localStorage in page.tsx
+
+    /* TODO: Uncomment when backend database is ready
     try {
       const apiData = {
         firstName: profileData.firstName,
@@ -84,6 +90,7 @@ export const profileAPI = {
       console.error("❌ Failed to save profile:", error);
       throw error;
     }
+    */
   },
 
   // ✅ Load profile safely
@@ -91,6 +98,12 @@ export const profileAPI = {
     userId: string,
     token: string
   ): Promise<Partial<ProfileFormData> | null> {
+    // TODO: Backend API - Database not ready yet
+    // Temporarily bypassing backend calls to use localStorage
+    console.warn("⚠️ Backend database unavailable - using mock/localStorage data");
+    return null; // Will trigger localStorage fallback in page.tsx
+
+    /* TODO: Uncomment when backend database is ready
     try {
       // --- safeguard: if authAPI or candidateAPI are missing ---
       if (!authAPI?.getUserProfile) {
@@ -100,7 +113,7 @@ export const profileAPI = {
 
       const userProfile = await authAPI.getUserProfile(userId, token);
       const candidateProfile =
-        (await candidateAPI.getProfile?.(token)) ||
+        (await candidateAPI.getProfile(userId, token)) ||
         (await candidateAPI.createOrUpdateProfile(
           {
             firstName: "",
@@ -141,6 +154,7 @@ export const profileAPI = {
       console.error("❌ Failed to load profile:", error);
       return this.mockProfile();
     }
+    */
   },
 
   // ✅ fallback mock
